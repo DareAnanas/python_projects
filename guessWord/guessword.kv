@@ -1,0 +1,16 @@
+<GuessWordGame>:
+    button: play_button
+    Label:
+        font_size: 50
+        center_x: root.width / 2
+        top: root.top - root.height / 10
+        text: "Welcome to Guess Word Game"
+
+    Button:
+        id: play_button
+        center_x: root.width / 2
+        top: root.top - 4 * root.height / 10
+        text: "Play"
+        font_size: 70
+        on_release: root.test()
+    
