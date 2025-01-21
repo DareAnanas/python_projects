@@ -1,8 +1,9 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.properties import ObjectProperty
+from kivy.uix.screenmanager import ScreenManager, Screen
 
-class GuessWordGame(Widget):
+class GuessWordGame(Screen):
     button = ObjectProperty(None)
 
     def on_kv_post(self, base_widget):
@@ -21,9 +22,10 @@ class GuessWordGame(Widget):
 
 class GuessWordApp(App):
     def build(self):
-        guessWordGame = GuessWordGame()
+        sm = ScreenManager()
+        sm.add_widget(GuessWordGame())
         
-        return guessWordGame
+        return sm
 
 if __name__ == '__main__':
     GuessWordApp().run()
