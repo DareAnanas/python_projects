@@ -1,10 +1,12 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
+from kivy.uix.popup import Popup
 from kivy.properties import NumericProperty, ReferenceListProperty, ObjectProperty
 from kivy.vector import Vector
 from kivy.clock import Clock
 
 class PongGame(Widget):
+    game_over = True
     ball = ObjectProperty(None)
     pong_bimba = ObjectProperty(None)
     player1 = ObjectProperty(None)
@@ -13,6 +15,22 @@ class PongGame(Widget):
     def serve_ball(self, vel=(4, 0)):
         self.ball.center = self.center
         self.ball.velocity = vel
+
+    def serve_player_score(self):
+        self.player1.score = 0
+        self.player2.score = 0
+
+    def game_start(self, instance):
+        self.serve_ball()
+        self.serve_player_score()
+        Clock.schedule_interval(self.update, 1.0 / 60.0)
+
+    def game_over(self):
+        Clock.unschedule(self.update)
+        gameOverPopup = GameOverPopup()
+        gameOverPopup.bind(on_dismiss=self.game_start)
+        gameOverPopup.open()
+
 
     def update(self, dt):
         self.ball.move()
@@ -31,9 +49,10 @@ class PongGame(Widget):
             self.player1.score += 1
             self.serve_ball(vel=(-4, 0))
 
+        if (self.player1.score >= 10 or self.player2.score >= 10):
+            self.game_over()
 
     def on_touch_move(self, touch):
-        #print(touch.x, touch.y)
         if (touch.x < self.width / 3):
             self.player1.center_y = touch.y
         if (touch.x > self.width - self.width / 3):
@@ -44,6 +63,7 @@ class PongApp(App):
         game = PongGame()
         game.serve_ball()
         Clock.schedule_interval(game.update, 1.0 / 60.0)
+        #Clock.unschedule(game.update)
         return game
 
 
@@ -73,6 +93,10 @@ class PongPaddle(Widget):
 
 class PongBimba(Widget):
     pass
+
+class GameOverPopup(Popup):
+    pass
+    
 
 if __name__ == '__main__':
     PongApp().run()

@@ -59,3 +59,18 @@
         Rectangle:
             pos: self.pos
             size: self.size
+
+
+
+<GameOverPopup>:
+    size_hint: 0.5, 0.5
+    auto_dismiss: False
+    title: "Game Over!"
+    title_size: 27
+    title_align: "center"
+    # Label:
+    #     text: "Game Over!"
+    #     font_size: 27
+    Button:
+        text: "Restart"
+        on_release: root.dismiss()
