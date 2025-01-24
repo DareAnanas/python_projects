@@ -1,0 +1,19 @@
+<MainScreen>:
+    input: input
+    label: label
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 30
+        Label:
+            id: label
+            text: 'No text input provided'
+            font_size: 50
+        TextInput:
+            id: input
+            text: 'Hello Input'
+            multiline: False
+        Button:
+            text: 'Transfer text'
+            on_press: label.text = input.text
+        

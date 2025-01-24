@@ -3,7 +3,7 @@ from kivy.uix.widget import Widget
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 
-class GuessWordGame(Screen):
+class GuessWordGame(Widget):
     button = ObjectProperty(None)
 
     def on_kv_post(self, base_widget):
@@ -22,10 +22,12 @@ class GuessWordGame(Screen):
 
 class GuessWordApp(App):
     def build(self):
-        sm = ScreenManager()
-        sm.add_widget(GuessWordGame())
+        # sm = ScreenManager()
+        # sm.add_widget(GuessWordGame())
+
+        game = GuessWordGame()
         
-        return sm
+        return game
 
 if __name__ == '__main__':
     GuessWordApp().run()

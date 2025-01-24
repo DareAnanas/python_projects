@@ -1,0 +1,35 @@
+<GuessWordMenu>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 30
+        Label:
+            text: "Welcome to Guess Word Game"
+            font_size: 40
+        Button:
+            text: "Play"
+            font_size: 40
+            on_press: root.manager.current = 'game'
+        Button:
+            text: 'Quit'
+            font_size: 40
+            on_press: app.stop()
+
+<GuessWordGame>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 30
+        Label:
+            id: label
+            text: 'Guess a word'
+        TextInput:
+            id: input
+            text: 'Enter a word'
+            multiline: False
+        Button:
+            text: 'Guess'
+            on_press: pass
+        Button:
+            text: 'Back to menu'
+            on_press: root.manager.current = 'menu'

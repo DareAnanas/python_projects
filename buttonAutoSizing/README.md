@@ -1,0 +1,1 @@
+tested button auto sizing

@@ -1,0 +1,17 @@
+<MenuScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            text: 'Goto settings'
+            on_press: root.change_screen()
+        Button:
+            text: 'Quit'
+
+<SettingsScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            text: 'Change some settings'
+        Button:
+            text: 'Back to menu'
+            on_press: root.change_screen()

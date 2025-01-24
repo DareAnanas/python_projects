@@ -1,0 +1,33 @@
+<MainScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 30
+        Label:
+            text: 'Test1'
+        Label:
+            text: 'Test1'
+        Label:
+            text: 'Test1'
+        Button:
+            text: 'Try'
+            on_press: 
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'second'
+
+<SecondScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 30
+        Label:
+            text: 'this on top'
+        Label:
+            text: 'this is center'
+        Label:
+            text: 'this on bottom'
+        Button:
+            text: 'Back'
+            on_press:
+                root.manager.transition.direction = 'right' 
+                root.manager.current = 'main'
