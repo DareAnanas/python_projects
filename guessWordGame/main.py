@@ -7,6 +7,7 @@ class GuessWordMenu(Screen):
 
 class GuessWordGame(Screen):
     words = ['chinza', 'pizza', 'pablo']
+    input = ObjectProperty(None)
 
     def checkWord(self):
         pass
