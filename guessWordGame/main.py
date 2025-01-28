@@ -11,46 +11,45 @@ class GuessWordGame(Screen):
     randomWord = None
     inputWord = None
     input = ObjectProperty(None)
-    label = ObjectProperty(None)
+    hintLabel = ObjectProperty(None)
 
     def on_kv_post(self, base_widget):
         self.randomWord = random.choice(self.words)
         print(self.randomWord)
 
-    def guessWordPositions(word, guess):
-        if guess == word:
-            return -1
-        
+    def countCorrectPositions(self):
         correct_positions = 0
-        for i in range(len(word)):
-            if i < len(guess) and word[i] == guess[i]:
+
+        for i in range(len(self.randomWord)):
+            if i < len(self.inputWord) and self.randomWord[i] == self.inputWord[i]:
                 correct_positions += 1
         
         return correct_positions
 
-    def guessButtonAction(self):
-        self.inputWord = self.getInputWord()
-        if (self.checkWordLength() == True):
-            self.checkWord()
-        else:
-            self.label.text = 'Your word must be ' + \
-            str(len(self.randomWord)) + \
-            ' letters'
-
     def getInputWord(self):
         return self.input.text.strip().lower()
 
-    def checkWord(self):
-        if (self.inputWord == self.randomWord):
-            self.label.text = 'You guessed!'
-        else:
-            self.label.text = 'Wrong word.'
+    def guessButtonAction(self):
+        self.inputWord = self.getInputWord()
 
-    def checkWordLength(self):
-        if (len(self.inputWord) == len(self.randomWord)):
-            return True
-        else:
-            return False
+        if (len(self.inputWord) != len(self.randomWord)):
+            self.hintLabel.text = 'Your word must be ' + \
+            str(len(self.randomWord)) + \
+            ' letters'
+            return
+        
+        if (self.inputWord == self.randomWord):
+            self.hintLabel.text = 'You guessed!'
+            return
+
+        correctPositions = self.countCorrectPositions()
+
+        if (correctPositions != 0):
+            self.hintLabel.text = str(correctPositions) + \
+                ' letter is on position'
+            return
+
+        self.hintLabel.text = 'Wrong word'
 
 class GuessWordApp(App):
     def build(self):
