@@ -17,6 +17,7 @@
 
 <GuessWordGame>:
     input: input
+    label: label
     BoxLayout:
         orientation: 'vertical'
         padding: [200, 100]
@@ -30,7 +31,7 @@
             multiline: False
         Button:
             text: 'Guess'
-            on_press: root.checkWord()
+            on_press: root.guessButtonAction()
         Button:
             text: 'Back to menu'
             on_press: root.manager.current = 'menu'
