@@ -17,12 +17,18 @@ class GuessWordGame(Screen):
     hintLabel = ObjectProperty(None)
     attemptsLabel = ObjectProperty(None)
     guessButton = ObjectProperty(None)
+    backToMenuButton = ObjectProperty(None)
     attempts = NumericProperty(ATTEMPTS)
     game_over = False
 
     def on_kv_post(self, base_widget):
         self.randomWord = random.choice(self.words)
+        self.guessButton.bind(on_press=self.guessButtonAction)
+        self.backToMenuButton.bind(on_press=self.backToMenu)
         print(self.randomWord)
+
+    def backToMenu(self):
+        self.manager.current = 'menu'
 
     def countCorrectPositions(self):
         correct_positions = 0
@@ -45,10 +51,10 @@ class GuessWordGame(Screen):
 
     def gameOver(self):
         self.game_over = True
-        print(self.guessButton.text)
         self.guessButton.unbind(on_press=self.guessButtonAction)
+        self.backToMenuButton.unbind(on_press=self.backToMenu)
 
-    def guessButtonAction(self):
+    def guessButtonAction(self, instance):
         self.attempts -= 1
         
         if (self.attempts <= 0):

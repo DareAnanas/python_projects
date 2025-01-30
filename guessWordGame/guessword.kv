@@ -20,6 +20,7 @@
     hintLabel: hintLabel
     attemptsLabel: attemptsLabel
     guessButton: guessButton
+    backToMenuButton: backToMenuButton
     BoxLayout:
         orientation: 'vertical'
         padding: [200, 100]
@@ -39,7 +40,6 @@
         Button:
             id: guessButton
             text: 'Guess'
-            on_press: root.guessButtonAction()
         Button:
+            id: backToMenuButton
             text: 'Back to menu'
-            on_press: root.manager.current = 'menu'
