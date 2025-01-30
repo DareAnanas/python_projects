@@ -18,18 +18,26 @@
 <GuessWordGame>:
     input: input
     hintLabel: hintLabel
+    attemptsLabel: attemptsLabel
+    guessButton: guessButton
     BoxLayout:
         orientation: 'vertical'
         padding: [200, 100]
         spacing: 30
         Label:
+            id: attemptsLabel
+            text: f"You have {root.attempts} attempts left"
+        Label:
             id: hintLabel
             text: 'Guess a word'
+            font_size: 30
         TextInput:
             id: input
             text: 'Enter a word'
+            font_size: 25
             multiline: False
         Button:
+            id: guessButton
             text: 'Guess'
             on_press: root.guessButtonAction()
         Button:
