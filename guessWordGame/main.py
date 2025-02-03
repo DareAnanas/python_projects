@@ -28,11 +28,13 @@ class GuessWordGame(Screen):
     def on_kv_post(self, base_widget):
         self.gameStart()
 
-    def gameStart(self):
+    def gameStart(self, instance = None):
         self.randomWord = random.choice(self.words)
         self.attempts = ATTEMPTS
         self.guessButton.bind(on_press=self.guessButtonAction)
         self.backToMenuButton.bind(on_press=self.backToMenu)
+        self.hintLabel.text = 'Guess a word'
+        self.input.text = 'Enter a word'
         print(self.randomWord)
 
     def backToMenu(self, instance):
@@ -63,6 +65,7 @@ class GuessWordGame(Screen):
         self.guessButton.unbind(on_press=self.guessButtonAction)
         self.backToMenuButton.unbind(on_press=self.backToMenu)
         gameResultPopup = GameResultPopup(title='Game Over!')
+        gameResultPopup.bind(on_dismiss=self.gameStart)
         gameResultPopup.open()
 
     def guessButtonAction(self, instance):
