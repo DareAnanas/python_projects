@@ -22,23 +22,22 @@ class GuessWordGame(Screen):
     attemptsLabel = ObjectProperty(None)
     guessButton = ObjectProperty(None)
     backToMenuButton = ObjectProperty(None)
-    attempts = NumericProperty(ATTEMPTS)
+    attempts = NumericProperty(0)
     game_over = False
 
     def on_kv_post(self, base_widget):
+        self.gameStart()
+
+    def gameStart(self):
         self.randomWord = random.choice(self.words)
+        self.attempts = ATTEMPTS
         self.guessButton.bind(on_press=self.guessButtonAction)
         self.backToMenuButton.bind(on_press=self.backToMenu)
         print(self.randomWord)
 
-    def gameStart(self):
-        self.randomWord = random.choice(self.words)
-        self.guessButton.bind(on_press=self.guessButtonAction)
-        self.backToMenuButton.bind(on_press=self.backToMenu)
-        self.attempts = ATTEMPTS
-
     def backToMenu(self, instance):
         self.manager.current = 'menu'
+        self.gameStart()
 
     def countCorrectPositions(self):
         correct_positions = 0
