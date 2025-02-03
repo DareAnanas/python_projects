@@ -1,10 +1,14 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
+from kivy.uix.popup import Popup
 from kivy.properties import ObjectProperty, NumericProperty
 from kivy.clock import Clock
 import random
 
 ATTEMPTS = 10
+
+class GameResultPopup(Popup):
+    pass
 
 class GuessWordMenu(Screen):
     pass
@@ -27,7 +31,13 @@ class GuessWordGame(Screen):
         self.backToMenuButton.bind(on_press=self.backToMenu)
         print(self.randomWord)
 
-    def backToMenu(self):
+    def gameStart(self):
+        self.randomWord = random.choice(self.words)
+        self.guessButton.bind(on_press=self.guessButtonAction)
+        self.backToMenuButton.bind(on_press=self.backToMenu)
+        self.attempts = ATTEMPTS
+
+    def backToMenu(self, instance):
         self.manager.current = 'menu'
 
     def countCorrectPositions(self):
@@ -53,6 +63,8 @@ class GuessWordGame(Screen):
         self.game_over = True
         self.guessButton.unbind(on_press=self.guessButtonAction)
         self.backToMenuButton.unbind(on_press=self.backToMenu)
+        gameResultPopup = GameResultPopup(title='Game Over!')
+        gameResultPopup.open()
 
     def guessButtonAction(self, instance):
         self.attempts -= 1

@@ -43,3 +43,15 @@
         Button:
             id: backToMenuButton
             text: 'Back to menu'
+
+<GameResultPopup>:
+    size_hint: 0.5, 0.5
+    auto_dismiss: False
+    title_size: 27
+    title_align: 'center'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [50, 50]
+        Button:
+            text: 'Restart'
+            on_release: root.dismiss()
