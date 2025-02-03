@@ -23,7 +23,6 @@ class GuessWordGame(Screen):
     guessButton = ObjectProperty(None)
     backToMenuButton = ObjectProperty(None)
     attempts = NumericProperty(0)
-    game_over = False
 
     def on_kv_post(self, base_widget):
         self.gameStart()
@@ -60,11 +59,13 @@ class GuessWordGame(Screen):
     def revertHintLabelColor(self, dt):
         self.hintLabel.color = 'white'
 
-    def gameOver(self):
-        self.game_over = True
+    def gameEnd(self, message, message_color):
         self.guessButton.unbind(on_press=self.guessButtonAction)
         self.backToMenuButton.unbind(on_press=self.backToMenu)
-        gameResultPopup = GameResultPopup(title='Game Over!')
+        gameResultPopup = GameResultPopup(
+            title=message, 
+            title_color=message_color
+        )
         gameResultPopup.bind(on_dismiss=self.gameStart)
         gameResultPopup.open()
 
@@ -72,7 +73,7 @@ class GuessWordGame(Screen):
         self.attempts -= 1
         
         if (self.attempts <= 0):
-            self.gameOver()
+            self.gameEnd('Game Over!', 'red')
 
         self.inputWord = self.getInputWord()
 
@@ -86,6 +87,7 @@ class GuessWordGame(Screen):
         if (self.inputWord == self.randomWord):
             self.hintLabel.text = 'You guessed!'
             self.setHintLabelColorForTime('green', 0.5)
+            self.gameEnd('Game Won!', 'green')
             return
 
         correctPositions = self.countCorrectPositions()
