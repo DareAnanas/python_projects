@@ -1,7 +1,8 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
-from kivy.properties import DictProperty
-from kivy.uix.button import Button
+from kivy.properties import DictProperty, NumericProperty, ObjectProperty
+from kivy.core.window import Window
+from kivy.uix.textinput import TextInput
 
 class ColorConverter:
 
@@ -50,12 +51,41 @@ class DoodleWordMenu(Screen):
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
 
+class DoodleWordGame(Screen):
+    
+    wordInput = ObjectProperty(None)
+    backToMenuButton = ObjectProperty(None)
+
+    def on_kv_post(self, base_widget):
+        self.bindGameActions()
+
+    def bindGameActions(self):
+        self.backToMenuButton.bind(on_press=self.backToMenu)
+
+    def unbindGameActions(self):
+        self.backToMenuButton.unbind(on_press=self.backToMenu)
+
+    def backToMenu(self, instance):
+        self.manager.current = 'menu'
+
+
 class DoodleWordApp(App):
+    FONT_SCALE = 0.05
+
     theme = DictProperty(ThemeManager.light_theme)
+    fontSize = NumericProperty(0)
+
+    def onWindowResize(self, window, size):
+        self.fontSize = size[0] * self.FONT_SCALE
 
     def build(self):
         sm = ScreenManager(transition=SwapTransition())
         sm.add_widget(DoodleWordMenu(name='menu'))
+        sm.add_widget(DoodleWordGame(name='game'))
+        
+        screen_width = Window.size[0]
+        self.fontSize = screen_width * self.FONT_SCALE
+        Window.bind(size=self.onWindowResize)
 
         return sm
 

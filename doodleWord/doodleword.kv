@@ -1,8 +1,19 @@
 <ThemedButton@Button>:
-    font_size: 40
+    font_size: app.fontSize
     color: app.theme['text_color']
     background_color: app.theme['button_bg']
     background_normal: ''
+
+<ThemedLabel@Label>:
+    font_size: app.fontSize
+    color: app.theme['text_color']
+    canvas.before:
+        Color:
+            rgba: app.theme['button_bg']
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        
 
 <DoodleWordMenu>:
     BoxLayout:
@@ -21,26 +32,65 @@
             keep_ratio: True
         Label:
             text: "Doodle Word"
-            font_size: 40
+            font_size: app.fontSize
             color: app.theme['text_color']
-        Button:
+        ThemedButton:
             text: "Почати гру"
-            font_size: 40
-            color: app.theme['text_color']
-            background_color: app.theme['button_bg']
-            background_normal: ''
             on_press: root.manager.current = 'game'
-        Button:
+        ThemedButton:
             text: 'Змінити тему'
-            font_size: 40
-            color: app.theme['text_color']
-            background_color: app.theme['button_bg']
-            background_normal: ''
             on_press: root.switchTheme()
-        Button:
+        ThemedButton:
             text: 'Вийти з гри'
-            font_size: 40
-            color: app.theme['text_color']
-            background_color: app.theme['button_bg']
-            background_normal: ''
             on_press: app.stop()
+
+<DoodleWordGame>:
+    wordInput: wordInput
+    backToMenuButton: backToMenuButton
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 30
+        canvas.before:
+            Color:
+                rgba: app.theme['bg_color']
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        GridLayout:
+            cols: 5
+            ThemedLabel:
+                text: 'S'
+            ThemedLabel:
+                text: 'U'
+            ThemedLabel:
+                text: 'S'
+            ThemedLabel:
+                text: 'S'
+            ThemedLabel:
+                text: 'Y'
+            ThemedLabel:
+                text: 'B'
+            ThemedLabel:
+                text: 'A'
+            ThemedLabel:
+                text: 'K'
+            ThemedLabel:
+                text: 'A'
+        TextInput:
+            id: wordInput
+            font_size: app.fontSize
+            background_color: app.theme['input_bg']
+            foreground_color: app.theme['text_color']
+            cursor_color: app.theme['text_color']
+            background_normal: ''
+            canvas.before:
+                Color:
+                    rgba: app.theme['stroke_color']
+                Line:
+                    width: 2
+                    rectangle: self.x, self.y, self.width, self.height
+        ThemedButton:
+            id: backToMenuButton
+            text: 'Повернутися в меню'
+
