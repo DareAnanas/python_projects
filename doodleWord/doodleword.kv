@@ -1,16 +1,46 @@
+<ThemedButton@Button>:
+    font_size: 40
+    color: app.theme['text_color']
+    background_color: app.theme['button_bg']
+    background_normal: ''
+
 <DoodleWordMenu>:
     BoxLayout:
         orientation: 'vertical'
         padding: [200, 100]
         spacing: 30
+        canvas.before:
+            Color:
+                rgba: app.theme['bg_color']
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Image:
+            source: app.theme['logo_image']
+            allow_stretch: True
+            keep_ratio: True
         Label:
             text: "Doodle Word"
             font_size: 40
+            color: app.theme['text_color']
         Button:
             text: "Почати гру"
             font_size: 40
+            color: app.theme['text_color']
+            background_color: app.theme['button_bg']
+            background_normal: ''
             on_press: root.manager.current = 'game'
+        Button:
+            text: 'Змінити тему'
+            font_size: 40
+            color: app.theme['text_color']
+            background_color: app.theme['button_bg']
+            background_normal: ''
+            on_press: root.switchTheme()
         Button:
             text: 'Вийти з гри'
             font_size: 40
+            color: app.theme['text_color']
+            background_color: app.theme['button_bg']
+            background_normal: ''
             on_press: app.stop()
