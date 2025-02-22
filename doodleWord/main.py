@@ -2,7 +2,8 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.properties import DictProperty, NumericProperty, ObjectProperty
 from kivy.core.window import Window
-from kivy.uix.textinput import TextInput
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
 
 class ColorConverter:
 
