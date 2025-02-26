@@ -2,8 +2,8 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.properties import DictProperty, NumericProperty, ObjectProperty
 from kivy.core.window import Window
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.button import Button
+import random
+
 
 class ColorConverter:
 
@@ -55,16 +55,29 @@ class DoodleWordMenu(Screen):
 class DoodleWordGame(Screen):
     
     wordInput = ObjectProperty(None)
+    confirmWordButton = ObjectProperty(None)
     backToMenuButton = ObjectProperty(None)
+    randomWord = None
+    app = None
 
     def on_kv_post(self, base_widget):
+        self.app = App.get_running_app()
         self.bindGameActions()
+        self.gameStart()
+
+    def gameStart(self):
+        self.randomWord = self.app.getRandomFiveLengthWord()
+        print(self.randomWord)
 
     def bindGameActions(self):
+        self.confirmWordButton.bind(on_press=self.guessWord)
         self.backToMenuButton.bind(on_press=self.backToMenu)
 
     def unbindGameActions(self):
         self.backToMenuButton.unbind(on_press=self.backToMenu)
+
+    def guessWord(self, instance):
+        print('Pierd')
 
     def backToMenu(self, instance):
         self.manager.current = 'menu'
@@ -76,6 +89,11 @@ class DoodleWordApp(App):
     theme = DictProperty(ThemeManager.light_theme)
     fontSize = NumericProperty(0)
 
+    fiveLengthWords = ['дошка', 'вудка', 'шапка', 'бочка', 'гірка']
+
+    def getRandomFiveLengthWord(self):
+        return random.choice(self.fiveLengthWords)
+
     def onWindowResize(self, window, size):
         self.fontSize = size[0] * self.FONT_SCALE
 
@@ -83,7 +101,7 @@ class DoodleWordApp(App):
         sm = ScreenManager(transition=SwapTransition())
         sm.add_widget(DoodleWordMenu(name='menu'))
         sm.add_widget(DoodleWordGame(name='game'))
-        
+
         screen_width = Window.size[0]
         self.fontSize = screen_width * self.FONT_SCALE
         Window.bind(size=self.onWindowResize)

@@ -5,7 +5,7 @@
     background_normal: ''
 
 <ThemedLabel@Label>:
-    font_size: app.fontSize
+    font_size: app.fontSize / 2
     color: app.theme['text_color']
     canvas.before:
         Color:
@@ -46,11 +46,12 @@
 
 <DoodleWordGame>:
     wordInput: wordInput
+    confirmWordButton: confirmWordButton
     backToMenuButton: backToMenuButton
     BoxLayout:
         orientation: 'vertical'
-        padding: [200, 100]
-        spacing: 30
+        padding: [200, 50]
+        spacing: 20
         canvas.before:
             Color:
                 rgba: app.theme['bg_color']
@@ -61,7 +62,7 @@
             cols: 5
             rows: 6
             spacing: 5
-            row_default_height: 50
+            size_hint_y: 0.7
             ThemedLabel:
                 text: 'S'
             ThemedLabel:
@@ -124,9 +125,8 @@
                 text: 'A'
         TextInput:
             id: wordInput
-            font_size: app.fontSize
-            size_hint_y: None
-            height: 60
+            font_size: app.fontSize / 2
+            size_hint_y: 0.1
             background_color: app.theme['input_bg']
             foreground_color: app.theme['text_color']
             cursor_color: app.theme['text_color']
@@ -138,8 +138,13 @@
                     width: 2
                     rectangle: self.x, self.y, self.width, self.height
         ThemedButton:
+            id: confirmWordButton
+            text: 'Вгадати слово'
+            size_hint_y: 0.1
+            font_size: app.fontSize / 2
+        ThemedButton:
             id: backToMenuButton
             text: 'Повернутися в меню'
-            size_hint_y: None
-            height: 50
+            size_hint_y: 0.1
+            font_size: app.fontSize / 2
 
