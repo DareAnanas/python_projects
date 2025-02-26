@@ -58,7 +58,9 @@ class DoodleWordGame(Screen):
     confirmWordButton = ObjectProperty(None)
     backToMenuButton = ObjectProperty(None)
     randomWord = None
+    inputWord = None
     app = None
+    wordHistory = []
 
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
@@ -66,7 +68,7 @@ class DoodleWordGame(Screen):
         self.gameStart()
 
     def gameStart(self):
-        self.randomWord = self.app.getRandomFiveLengthWord()
+        self.randomWord = self.app.getRandomWord()
         print(self.randomWord)
 
     def bindGameActions(self):
@@ -74,10 +76,28 @@ class DoodleWordGame(Screen):
         self.backToMenuButton.bind(on_press=self.backToMenu)
 
     def unbindGameActions(self):
+        self.confirmWordButton.unbind(on_press=self.guessWord)
         self.backToMenuButton.unbind(on_press=self.backToMenu)
 
     def guessWord(self, instance):
+        self.inputWord = self.getInputWord()
+        if (len(self.inputWord) != self.app.edition['length']):
+            return
+        if (self.inputWord not in self.app.edition['words']):
+            return
+
+        self.wordHistory.append(self.inputWord)
+
+        if (len(self.wordHistory) >= 6):
+            print('You lose')
+            return
+
+        print(self.wordHistory)
         print('Pierd')
+
+
+    def getInputWord(self):
+        return self.wordInput.text.strip().lower()
 
     def backToMenu(self, instance):
         self.manager.current = 'menu'
@@ -89,10 +109,32 @@ class DoodleWordApp(App):
     theme = DictProperty(ThemeManager.light_theme)
     fontSize = NumericProperty(0)
 
-    fiveLengthWords = ['дошка', 'вудка', 'шапка', 'бочка', 'гірка']
+    editions = {
+        'fourLetter': {
+            'length': 4,
+            'words': ['піна', 'роса', 'баня', 'гора', 'лихо']
+        },
+        'fiveLetter': {
+            'length': 5,
+            'words': ['дошка', 'вудка', 'шапка', 'бочка', 'гірка']
+        },
+        'sixLetter': {
+            'length': 6,
+            'words': ['ролики', 'ананас', 'дракон', 'поезія', 'латунь']
+        },
+        'sevenLetter': {
+            'length': 7,
+            'words': ['барабан', 'ракетка', 'локшина', 'будинок', 'вершина']
+        }
+    }
 
-    def getRandomFiveLengthWord(self):
-        return random.choice(self.fiveLengthWords)
+    edition = editions['fiveLetter']
+
+    def setEdition(self, mode):
+        self.edition = self.editions[mode]
+
+    def getRandomWord(self):
+        return random.choice(self.edition['words'])
 
     def onWindowResize(self, window, size):
         self.fontSize = size[0] * self.FONT_SCALE
