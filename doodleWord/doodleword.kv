@@ -45,6 +45,7 @@
             on_press: app.stop()
 
 <DoodleWordGame>:
+    wordGrid: wordGrid
     wordInput: wordInput
     confirmWordButton: confirmWordButton
     backToMenuButton: backToMenuButton
@@ -59,6 +60,7 @@
                 pos: self.pos
                 size: self.size
         GridLayout:
+            id: wordGrid
             cols: 5
             rows: 6
             spacing: 5

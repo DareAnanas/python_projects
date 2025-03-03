@@ -2,6 +2,7 @@ from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.properties import DictProperty, NumericProperty, ObjectProperty
 from kivy.core.window import Window
+from kivy.factory import Factory
 import random
 
 
@@ -54,6 +55,7 @@ class DoodleWordMenu(Screen):
 
 class DoodleWordGame(Screen):
     
+    wordGrid = ObjectProperty(None)
     wordInput = ObjectProperty(None)
     confirmWordButton = ObjectProperty(None)
     backToMenuButton = ObjectProperty(None)
@@ -69,6 +71,10 @@ class DoodleWordGame(Screen):
 
     def gameStart(self):
         self.randomWord = self.app.getRandomWord()
+        themedLabel = Factory.ThemedLabel()
+        for i in range(5*6):
+            self.wordGrid.add_widget(themedLabel)
+        
         print(self.randomWord)
 
     def bindGameActions(self):
@@ -78,6 +84,16 @@ class DoodleWordGame(Screen):
     def unbindGameActions(self):
         self.confirmWordButton.unbind(on_press=self.guessWord)
         self.backToMenuButton.unbind(on_press=self.backToMenu)
+
+    def checkLetterAndGetColor(self):
+        for i in range(self.app.edition['length']):
+            if (self.inputWord[i] == self.randomWord[i]):
+                yield 'green'
+            elif (self.inputWord[i] in self.randomWord):
+                yield 'yellow'
+            else:
+                yield 'gray'
+
 
     def guessWord(self, instance):
         self.inputWord = self.getInputWord()
@@ -92,6 +108,9 @@ class DoodleWordGame(Screen):
             print('You lose')
             return
 
+        for color in self.checkLetterAndGetColor():
+            print(color)
+        
         print(self.wordHistory)
         print('Pierd')
 

@@ -6,7 +6,7 @@ def hexToRgba(hex_color, alpha=1):
     return [round(r / 255.0, 4), round(g / 255.0, 4), round(b / 255.0, 4), alpha]
 
 
-print(hexToRgba('#1E1E1E'))
+print(hexToRgba('#1f1f1f'))
 
 print(int(0.11764705882352941 * 255))
 
