@@ -63,6 +63,8 @@ class DoodleWordGame(Screen):
     inputWord = None
     app = None
     wordHistory = []
+    gridLabels = []
+    rowIndex = 0
 
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
@@ -71,8 +73,9 @@ class DoodleWordGame(Screen):
 
     def gameStart(self):
         self.randomWord = self.app.getRandomWord()
-        themedLabel = Factory.ThemedLabel()
         for i in range(5*6):
+            themedLabel = Factory.ThemedLabel()
+            self.gridLabels.append(themedLabel)
             self.wordGrid.add_widget(themedLabel)
         
         print(self.randomWord)
@@ -104,12 +107,11 @@ class DoodleWordGame(Screen):
 
         self.wordHistory.append(self.inputWord)
 
-        if (len(self.wordHistory) >= 6):
-            print('You lose')
-            return
+        for i, letter in enumerate(self.inputWord):
+            self.gridLabels[self.rowIndex * 5 + i].text = letter
 
-        for color in self.checkLetterAndGetColor():
-            print(color)
+        for i, color in enumerate(self.checkLetterAndGetColor()):
+            self.gridLabels[self.rowIndex * 5 + i].text = 'F'
         
         print(self.wordHistory)
         print('Pierd')
