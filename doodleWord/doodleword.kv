@@ -9,11 +9,10 @@
     color: app.theme['text_color']
     canvas.before:
         Color:
-            rgba: app.theme['button_bg']
+            rgba: self.bg_color
         Rectangle:
             pos: self.pos
-            size: self.size
-        
+            size: self.size    
 
 <DoodleWordMenu>:
     BoxLayout:

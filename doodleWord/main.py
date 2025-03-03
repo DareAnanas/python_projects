@@ -1,6 +1,7 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
-from kivy.properties import DictProperty, NumericProperty, ObjectProperty
+from kivy.uix.label import Label
+from kivy.properties import DictProperty, NumericProperty, ObjectProperty, ListProperty
 from kivy.core.window import Window
 from kivy.factory import Factory
 import random
@@ -21,6 +22,10 @@ class ColorConverter:
         '#C16565': [193, 101, 101, 1]
     }
 
+    cssColorsRgbaDict = {
+
+    }
+
 class ThemeManager:
     light_theme = {
         'bg_color': ColorConverter.hexToRgba('#FCFCFC'),
@@ -39,7 +44,12 @@ class ThemeManager:
         'logo_image': 'logo_dark.png'
     }
 
+class ThemedLabel(Label):
+    bg_color = ListProperty([1, 1, 1, 1])
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bg_color = App.get_running_app().theme['button_bg']
 
 class DoodleWordMenu(Screen):
 
@@ -74,7 +84,7 @@ class DoodleWordGame(Screen):
     def gameStart(self):
         self.randomWord = self.app.getRandomWord()
         for i in range(5*6):
-            themedLabel = Factory.ThemedLabel()
+            themedLabel = ThemedLabel()
             self.gridLabels.append(themedLabel)
             self.wordGrid.add_widget(themedLabel)
         
@@ -91,11 +101,11 @@ class DoodleWordGame(Screen):
     def checkLetterAndGetColor(self):
         for i in range(self.app.edition['length']):
             if (self.inputWord[i] == self.randomWord[i]):
-                yield 'green'
+                yield '#008000' # green
             elif (self.inputWord[i] in self.randomWord):
-                yield 'yellow'
+                yield '#A1B907' # dark yellow
             else:
-                yield 'gray'
+                yield '#808080' # gray
 
 
     def guessWord(self, instance):
@@ -108,11 +118,15 @@ class DoodleWordGame(Screen):
         self.wordHistory.append(self.inputWord)
 
         for i, letter in enumerate(self.inputWord):
-            self.gridLabels[self.rowIndex * 5 + i].text = letter
+            self.gridLabels[self.rowIndex * 5 + i].text = letter.upper()
 
         for i, color in enumerate(self.checkLetterAndGetColor()):
-            self.gridLabels[self.rowIndex * 5 + i].text = 'F'
+            self.gridLabels[self.rowIndex * 5 + i].bg_color = ColorConverter.hexToRgba(color)
         
+        self.rowIndex += 1
+
+        self.wordInput.text = ''
+
         print(self.wordHistory)
         print('Pierd')
 
