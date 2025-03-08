@@ -1,7 +1,10 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.uix.label import Label
-from kivy.properties import DictProperty, NumericProperty, ObjectProperty, ListProperty
+from kivy.uix.popup import Popup
+from kivy.uix.modalview import ModalView
+from kivy.properties import DictProperty, NumericProperty, \
+ObjectProperty, ListProperty, StringProperty, ColorProperty
 from kivy.core.window import Window
 from kivy.factory import Factory
 import random
@@ -33,7 +36,12 @@ class ThemeManager:
         'button_bg': ColorConverter.hexToRgba('#EC9D75'),
         'input_bg': ColorConverter.hexToRgba('#FCFCFC'),
         'stroke_color': ColorConverter.hexToRgba('#1E1E1E'),
-        'logo_image': 'logo_light.png'
+        'logo_image': 'logo_light.png',
+        'correct_color': ColorConverter.hexToRgba('#00C300'),
+        'partly_correct_color': ColorConverter.hexToRgba('#D4EF07'),
+        'incorrect_color': ColorConverter.hexToRgba('#B1B1B1'),
+        'victory_color': ColorConverter.hexToRgba('#00C300'),
+        'defeat_color': ColorConverter.hexToRgba('#FF0000')
     }
     dark_theme = {
         'bg_color': ColorConverter.hexToRgba('#1E1E1E'),
@@ -41,7 +49,12 @@ class ThemeManager:
         'button_bg': ColorConverter.hexToRgba('#C16565'),
         'input_bg': ColorConverter.hexToRgba('#C16565'),
         'stroke_color': ColorConverter.hexToRgba('#FCFCFC'),
-        'logo_image': 'logo_dark.png'
+        'logo_image': 'logo_dark.png',
+        'correct_color': ColorConverter.hexToRgba('#008000'),
+        'partly_correct_color': ColorConverter.hexToRgba('#A1B907'),
+        'incorrect_color': ColorConverter.hexToRgba('#808080'),
+        'victory_color': ColorConverter.hexToRgba('#008000'),
+        'defeat_color': ColorConverter.hexToRgba('#FF0000')
     }
 
 class ThemedLabel(Label):
@@ -50,6 +63,7 @@ class ThemedLabel(Label):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.bg_color = App.get_running_app().theme['button_bg']
+        
 
 class DoodleWordMenu(Screen):
 
@@ -62,6 +76,22 @@ class DoodleWordMenu(Screen):
 
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
+
+class GameEndModal(ModalView):
+    title = StringProperty('')
+    color = ColorProperty([1, 1, 1, 1])
+    restartButton = ObjectProperty(None)
+
+    def __init__(self, title='', color=[1, 1, 1, 1], **kwargs):
+        super().__init__(**kwargs)
+        self.title = title
+        self.color = color
+        self.restartButton.bind(on_press=self.restartGame)
+
+    def restartGame(self, instance):
+        self.dismiss()
+        App.get_running_app().root.get_screen('game').gameRestart()
+        App.get_running_app().root.get_screen('game').gameStart()
 
 class DoodleWordGame(Screen):
     
@@ -90,6 +120,32 @@ class DoodleWordGame(Screen):
         
         print(self.randomWord)
 
+    def gameRestart(self):
+        self.gridLabels.clear()
+        self.wordGrid.clear_widgets()
+        self.rowIndex = 0
+        self.wordHistory.clear()
+
+        self.bindGameActions()
+
+    def gameEnd(self, state):
+        self.unbindGameActions()
+
+        if (state == 'victory'):
+            gameEndModal = GameEndModal(
+                title='Ти переміг!', 
+                color=self.app.theme['victory_color']
+            )
+            gameEndModal.open()
+        elif (state == 'defeat'):
+            gameEndModal = GameEndModal(
+                title='Ти програв!',
+                color=self.app.theme['defeat_color']
+            )
+            gameEndModal.open()
+        else:
+            print('Розробник лох')
+
     def bindGameActions(self):
         self.confirmWordButton.bind(on_press=self.guessWord)
         self.backToMenuButton.bind(on_press=self.backToMenu)
@@ -101,11 +157,11 @@ class DoodleWordGame(Screen):
     def checkLetterAndGetColor(self):
         for i in range(self.app.edition['length']):
             if (self.inputWord[i] == self.randomWord[i]):
-                yield '#008000' # green
+                yield self.app.theme['correct_color'] # green
             elif (self.inputWord[i] in self.randomWord):
-                yield '#A1B907' # dark yellow
+                yield self.app.theme['partly_correct_color'] # dark yellow
             else:
-                yield '#808080' # gray
+                yield self.app.theme['incorrect_color'] # gray
 
 
     def guessWord(self, instance):
@@ -121,11 +177,16 @@ class DoodleWordGame(Screen):
             self.gridLabels[self.rowIndex * 5 + i].text = letter.upper()
 
         for i, color in enumerate(self.checkLetterAndGetColor()):
-            self.gridLabels[self.rowIndex * 5 + i].bg_color = ColorConverter.hexToRgba(color)
+            self.gridLabels[self.rowIndex * 5 + i].bg_color = color
         
         self.rowIndex += 1
 
         self.wordInput.text = ''
+
+        if (self.inputWord == self.randomWord):
+            self.gameEnd(state='victory')
+        elif (self.rowIndex >= 6):
+            self.gameEnd(state='defeat')
 
         print(self.wordHistory)
         print('Pierd')

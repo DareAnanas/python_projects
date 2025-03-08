@@ -7,7 +7,7 @@ def hexToRgba(hex_color, alpha=1):
 
 
 print(hexToRgba('#008000'))
-print(hexToRgba('#FFFF00'))
+print(hexToRgba('#E30000'))
 print(hexToRgba('#808080'))
 
 # print(int(0.11764705882352941 * 255))

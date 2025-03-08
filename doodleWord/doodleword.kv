@@ -43,6 +43,29 @@
             text: 'Вийти з гри'
             on_press: app.stop()
 
+<GameEndModal>:
+    size_hint: 0.5, 0.5
+    auto_dismiss: False
+    background: ''
+    background_color: app.theme['bg_color']
+    restartButton: restartButton
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 10]
+        spacing: 5
+        Label:
+            text: root.title
+            font_size: app.fontSize
+            color: root.color
+        Label:
+            text: 'Правильне слово: ' + app.root.get_screen('game').randomWord
+            color: app.theme['text_color']
+            font_size: app.fontSize / 2
+        ThemedButton:
+            id: restartButton
+            text: 'Грати знову'
+            font_size: app.fontSize / 2
+
 <DoodleWordGame>:
     wordGrid: wordGrid
     wordInput: wordInput
