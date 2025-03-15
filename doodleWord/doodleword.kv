@@ -71,7 +71,7 @@
                 size_hint_x: 0.6
                 font_size: app.fontSize
                 color: app.theme['text_color']
-                text: self.parent.items[self.parent.index]
+                text: self.parent.items[self.parent.index][1]
             Button:
                 size_hint_x: 0.2
                 background_color: app.theme['button_bg']
@@ -130,7 +130,7 @@
                 size: self.size
         GridLayout:
             id: wordGrid
-            cols: 5
+            cols: app.edition['length']
             rows: 6
             spacing: 5
             size_hint_y: 0.7

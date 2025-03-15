@@ -81,22 +81,30 @@ class DoodleWordMenu(Screen):
         self.manager.current = 'settings'
     
 class SpinBox(BoxLayout):
-    index = NumericProperty(0)
+    app = None
+    index = NumericProperty(1)
     items = ListProperty([])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.items = App.get_running_app().editionsNames
+        self.app = App.get_running_app()
+        self.items = self.app.editionsNames
 
     def nextElement(self):
         if (self.index + 1 >= len(self.items)):
             return
         self.index += 1
+        self.app.setEdition(self.items[self.index][0])
+        self.app.root.get_screen('game').gameRestart()
+        self.app.root.get_screen('game').gameStart()
 
     def prevElement(self):
         if (self.index <= 0):
             return
         self.index -= 1
+        self.app.setEdition(self.items[self.index][0])
+        self.app.root.get_screen('game').gameRestart()
+        self.app.root.get_screen('game').gameStart()
 
 class DoodleWordSettings(Screen):
     def on_kv_post(self, base_widget):
@@ -147,7 +155,8 @@ class DoodleWordGame(Screen):
 
     def gameStart(self):
         self.randomWord = self.app.getRandomWord()
-        for i in range(5*6):
+        self.wordGrid.cols = self.app.edition['length']
+        for i in range(self.app.edition['length']*6):
             themedLabel = ThemedLabel()
             self.gridLabels.append(themedLabel)
             self.wordGrid.add_widget(themedLabel)
@@ -198,6 +207,8 @@ class DoodleWordGame(Screen):
             if (self.inputWord[i] == self.randomWord[i]):
                 rowColors[i] = self.app.theme['correct_color']
 
+        partlyCorrectMemory = []
+
         for i in range(self.app.edition['length']):
             if (rowColors[i] == self.app.theme['incorrect_color']):
                 isPartlyCorrectColor = False
@@ -206,7 +217,10 @@ class DoodleWordGame(Screen):
                         continue
                     if (rowColors[j] == self.app.theme['correct_color']):
                         continue
+                    if (j in partlyCorrectMemory):
+                        continue
                     if (self.inputWord[i] == self.randomWord[j]):
+                        partlyCorrectMemory.append(j)
                         isPartlyCorrectColor = True
                 if (isPartlyCorrectColor):
                     rowColors[i] = self.app.theme['partly_correct_color']
@@ -223,10 +237,10 @@ class DoodleWordGame(Screen):
         self.wordHistory.append(self.inputWord)
 
         for i, letter in enumerate(self.inputWord):
-            self.gridLabels[self.rowIndex * 5 + i].text = letter.upper()
+            self.gridLabels[self.rowIndex * self.app.edition['length'] + i].text = letter.upper()
 
         for i, color in enumerate(self.getRowColors()):
-            self.gridLabels[self.rowIndex * 5 + i].bg_color = color
+            self.gridLabels[self.rowIndex * self.app.edition['length'] + i].bg_color = color
         
         self.rowIndex += 1
 
@@ -261,7 +275,8 @@ class DoodleWordApp(App):
         },
         'fiveLetter': {
             'length': 5,
-            'words': ['дошка', 'вудка', 'шапка', 'бочка', 'гірка']
+            # 'words': ['дошка', 'вудка', 'шапка', 'бочка', 'гірка']
+            'words': ['хелло', 'ллама']
         },
         'sixLetter': {
             'length': 6,
@@ -273,9 +288,16 @@ class DoodleWordApp(App):
         }
     }
 
-    edition = editions['fiveLetter']
+    defaultEdition = 'fiveLetter'
 
-    editionsNames = ['4 букви', '5 букв', '6 букв', '7 букв']
+    edition = editions[defaultEdition]
+
+    editionsNames = [
+        ['fourLetter','4 букви'],
+        ['fiveLetter','5 букв'], 
+        ['sixLetter','6 букв'], 
+        ['sevenLetter','7 букв']
+    ]
 
     def setEdition(self, mode):
         self.edition = self.editions[mode]
