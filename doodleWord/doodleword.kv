@@ -4,7 +4,7 @@
     background_color: app.theme['button_bg']
     background_normal: ''
 
-<ThemedLabel@Label>:
+<ThemedLabel>:
     font_size: app.fontSize / 2
     color: app.theme['text_color']
     canvas.before:
@@ -54,9 +54,11 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+        ThemedButton:
+            text: 'Перезапустити гру'
+            on_press: root.restartGame()
         SpinBox:
             id: spinBox
-            size_hint_y: 0.6
             Button:
                 size_hint_x: 0.2
                 background_color: app.theme['button_bg']

@@ -96,7 +96,6 @@ class SpinBox(BoxLayout):
         self.index += 1
         self.app.setEdition(self.items[self.index][0])
         self.app.root.get_screen('game').gameRestart()
-        self.app.root.get_screen('game').gameStart()
 
     def prevElement(self):
         if (self.index <= 0):
@@ -104,7 +103,6 @@ class SpinBox(BoxLayout):
         self.index -= 1
         self.app.setEdition(self.items[self.index][0])
         self.app.root.get_screen('game').gameRestart()
-        self.app.root.get_screen('game').gameStart()
 
 class DoodleWordSettings(Screen):
     def on_kv_post(self, base_widget):
@@ -115,6 +113,9 @@ class DoodleWordSettings(Screen):
             self.app.theme = ThemeManager.dark_theme
         elif (self.app.theme == ThemeManager.dark_theme):
             self.app.theme = ThemeManager.light_theme
+
+    def restartGame(self):
+        self.app.root.get_screen('game').gameRestart()
 
     def backToMenu(self):
         self.manager.current = 'menu'
@@ -133,7 +134,6 @@ class GameEndModal(ModalView):
     def restartGame(self, instance):
         self.dismiss()
         App.get_running_app().root.get_screen('game').gameRestart()
-        App.get_running_app().root.get_screen('game').gameStart()
 
 class DoodleWordGame(Screen):
     
@@ -170,6 +170,8 @@ class DoodleWordGame(Screen):
         self.wordHistory.clear()
 
         self.bindGameActions()
+
+        self.gameStart()
 
     def gameEnd(self, state):
         self.unbindGameActions()
@@ -275,8 +277,7 @@ class DoodleWordApp(App):
         },
         'fiveLetter': {
             'length': 5,
-            # 'words': ['дошка', 'вудка', 'шапка', 'бочка', 'гірка']
-            'words': ['хелло', 'ллама']
+            'words': ['дошка', 'вудка', 'шапка', 'бочка', 'гірка']
         },
         'sixLetter': {
             'length': 6,
