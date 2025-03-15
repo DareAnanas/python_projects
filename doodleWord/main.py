@@ -3,11 +3,14 @@ from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.modalview import ModalView
+from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import DictProperty, NumericProperty, \
 ObjectProperty, ListProperty, StringProperty, ColorProperty
 from kivy.core.window import Window
 from kivy.factory import Factory
 import random
+
+from kivy.uix.textinput import TextInput
 
 
 class ColorConverter:
@@ -41,7 +44,9 @@ class ThemeManager:
         'partly_correct_color': ColorConverter.hexToRgba('#D4EF07'),
         'incorrect_color': ColorConverter.hexToRgba('#B1B1B1'),
         'victory_color': ColorConverter.hexToRgba('#00C300'),
-        'defeat_color': ColorConverter.hexToRgba('#FF0000')
+        'defeat_color': ColorConverter.hexToRgba('#FF0000'),
+        'left_arrow_image': 'left_arrow_light.png',
+        'right_arrow_image': 'right_arrow_light.png'
     }
     dark_theme = {
         'bg_color': ColorConverter.hexToRgba('#1E1E1E'),
@@ -54,7 +59,9 @@ class ThemeManager:
         'partly_correct_color': ColorConverter.hexToRgba('#A1B907'),
         'incorrect_color': ColorConverter.hexToRgba('#808080'),
         'victory_color': ColorConverter.hexToRgba('#008000'),
-        'defeat_color': ColorConverter.hexToRgba('#FF0000')
+        'defeat_color': ColorConverter.hexToRgba('#FF0000'),
+        'left_arrow_image': 'left_arrow_dark.png',
+        'right_arrow_image': 'right_arrow_dark.png'
     }
 
 class ThemedLabel(Label):
@@ -73,6 +80,23 @@ class DoodleWordMenu(Screen):
     def goToSettings(self):
         self.manager.current = 'settings'
     
+class SpinBox(BoxLayout):
+    index = NumericProperty(0)
+    items = ListProperty([])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.items = App.get_running_app().editionsNames
+
+    def nextElement(self):
+        if (self.index + 1 >= len(self.items)):
+            return
+        self.index += 1
+
+    def prevElement(self):
+        if (self.index <= 0):
+            return
+        self.index -= 1
 
 class DoodleWordSettings(Screen):
     def on_kv_post(self, base_widget):
@@ -250,6 +274,8 @@ class DoodleWordApp(App):
     }
 
     edition = editions['fiveLetter']
+
+    editionsNames = ['4 букви', '5 букв', '6 букв', '7 букв']
 
     def setEdition(self, mode):
         self.edition = self.editions[mode]

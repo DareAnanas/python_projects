@@ -54,6 +54,35 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
+        SpinBox:
+            id: spinBox
+            size_hint_y: 0.6
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.prevElement()
+                Image:
+                    source: app.theme['left_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+            Label:
+                size_hint_x: 0.6
+                font_size: app.fontSize
+                color: app.theme['text_color']
+                text: self.parent.items[self.parent.index]
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.nextElement()
+                Image:
+                    source: app.theme['right_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y      
+                
         ThemedButton:
             text: 'Змінити тему'
             on_press: root.switchTheme()
