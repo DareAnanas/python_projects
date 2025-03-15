@@ -37,11 +37,29 @@
             text: "Почати гру"
             on_press: root.manager.current = 'game'
         ThemedButton:
-            text: 'Змінити тему'
-            on_press: root.switchTheme()
+            text: 'Налаштування'
+            on_press: root.goToSettings()
         ThemedButton:
             text: 'Вийти з гри'
             on_press: app.stop()
+
+<DoodleWordSettings>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 30
+        canvas.before:
+            Color:
+                rgba: app.theme['bg_color']
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        ThemedButton:
+            text: 'Змінити тему'
+            on_press: root.switchTheme()
+        ThemedButton:
+            text: 'Назад'
+            on_press: root.backToMenu()
 
 <GameEndModal>:
     size_hint: 0.5, 0.5

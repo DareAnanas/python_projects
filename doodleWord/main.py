@@ -67,15 +67,25 @@ class ThemedLabel(Label):
 
 class DoodleWordMenu(Screen):
 
+    def on_kv_post(self, base_widget):
+        self.app = App.get_running_app()
+
+    def goToSettings(self):
+        self.manager.current = 'settings'
+    
+
+class DoodleWordSettings(Screen):
+    def on_kv_post(self, base_widget):
+        self.app = App.get_running_app()
+
     def switchTheme(self):
         if (self.app.theme == ThemeManager.light_theme):
             self.app.theme = ThemeManager.dark_theme
         elif (self.app.theme == ThemeManager.dark_theme):
             self.app.theme = ThemeManager.light_theme
 
-
-    def on_kv_post(self, base_widget):
-        self.app = App.get_running_app()
+    def backToMenu(self):
+        self.manager.current = 'menu'
 
 class GameEndModal(ModalView):
     title = StringProperty('')
@@ -253,6 +263,7 @@ class DoodleWordApp(App):
     def build(self):
         sm = ScreenManager(transition=SwapTransition())
         sm.add_widget(DoodleWordMenu(name='menu'))
+        sm.add_widget(DoodleWordSettings(name='settings'))
         sm.add_widget(DoodleWordGame(name='game'))
 
         screen_width = Window.size[0]
