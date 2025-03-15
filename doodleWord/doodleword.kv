@@ -27,8 +27,7 @@
                 size: self.size
         Image:
             source: app.theme['logo_image']
-            allow_stretch: True
-            keep_ratio: True
+            fit_mode: 'contain'
         Label:
             text: "Doodle Word"
             font_size: app.fontSize
