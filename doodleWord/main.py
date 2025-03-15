@@ -154,15 +154,30 @@ class DoodleWordGame(Screen):
         self.confirmWordButton.unbind(on_press=self.guessWord)
         self.backToMenuButton.unbind(on_press=self.backToMenu)
 
-    def checkLetterAndGetColor(self):
+    def getRowColors(self):
+        rowColors = []
+
+        for i in range(self.app.edition['length']):
+            rowColors.append(self.app.theme['incorrect_color'])
+
         for i in range(self.app.edition['length']):
             if (self.inputWord[i] == self.randomWord[i]):
-                yield self.app.theme['correct_color'] # green
-            elif (self.inputWord[i] in self.randomWord):
-                yield self.app.theme['partly_correct_color'] # dark yellow
-            else:
-                yield self.app.theme['incorrect_color'] # gray
+                rowColors[i] = self.app.theme['correct_color']
 
+        for i in range(self.app.edition['length']):
+            if (rowColors[i] == self.app.theme['incorrect_color']):
+                isPartlyCorrectColor = False
+                for j in range(self.app.edition['length']):
+                    if (isPartlyCorrectColor):
+                        continue
+                    if (rowColors[j] == self.app.theme['correct_color']):
+                        continue
+                    if (self.inputWord[i] == self.randomWord[j]):
+                        isPartlyCorrectColor = True
+                if (isPartlyCorrectColor):
+                    rowColors[i] = self.app.theme['partly_correct_color']
+
+        return rowColors
 
     def guessWord(self, instance):
         self.inputWord = self.getInputWord()
@@ -176,7 +191,7 @@ class DoodleWordGame(Screen):
         for i, letter in enumerate(self.inputWord):
             self.gridLabels[self.rowIndex * 5 + i].text = letter.upper()
 
-        for i, color in enumerate(self.checkLetterAndGetColor()):
+        for i, color in enumerate(self.getRowColors()):
             self.gridLabels[self.rowIndex * 5 + i].bg_color = color
         
         self.rowIndex += 1
