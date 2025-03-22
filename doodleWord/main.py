@@ -9,6 +9,7 @@ ObjectProperty, ListProperty, StringProperty, ColorProperty
 from kivy.core.window import Window
 from kivy.factory import Factory
 import random
+from words import fiveLetterWords, sixLetterWords
 
 from kivy.uix.textinput import TextInput
 
@@ -302,11 +303,11 @@ class DoodleWordApp(App):
         },
         'fiveLetter': {
             'length': 5,
-            'words': ['дошка', 'вудка', 'шапка', 'бочка', 'гірка']
+            'words': fiveLetterWords
         },
         'sixLetter': {
             'length': 6,
-            'words': ['ролики', 'ананас', 'дракон', 'поезія', 'латунь']
+            'words': sixLetterWords
         },
         'sevenLetter': {
             'length': 7,
@@ -348,6 +349,8 @@ class DoodleWordApp(App):
         self.fontSize = size[0] * self.FONT_SCALE
 
     def build(self):
+        Window.softinput_mode = 'below_target'
+
         sm = ScreenManager(transition=SwapTransition())
         sm.add_widget(DoodleWordMenu(name='menu'))
         sm.add_widget(DoodleWordSettings(name='settings'))
