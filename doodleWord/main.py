@@ -9,6 +9,8 @@ ObjectProperty, ListProperty, StringProperty, ColorProperty
 from kivy.core.window import Window
 from kivy.factory import Factory
 import random
+import configparser
+import os
 from words import fiveLetterWords, sixLetterWords
 
 from kivy.uix.textinput import TextInput
@@ -130,19 +132,38 @@ class AttemptsSpinBox(BoxLayout):
         self.app.root.get_screen('game').gameRestart()
 
 class DoodleWordSettings(Screen):
+
+    changedSettings = False
+
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
+
+    def changeSetting(self, key, value):
+        self.app.settings[key] = value
+        self.changedSettings = True
 
     def switchTheme(self):
         if (self.app.theme == ThemeManager.light_theme):
             self.app.theme = ThemeManager.dark_theme
+            self.changeSetting('theme', 'dark')
         elif (self.app.theme == ThemeManager.dark_theme):
             self.app.theme = ThemeManager.light_theme
+            self.changeSetting('theme', 'light')
+
+    def writeConfig(self):
+        config = configparser.ConfigParser()
+        config['Settings'] = self.app.settings
+        thisFileDir = os.path.dirname(os.path.abspath(__file__))
+        configPath = os.path.join(thisFileDir, 'config.ini')
+        with open(configPath, 'w') as file:
+            config.write(file)
 
     def restartGame(self):
         self.app.root.get_screen('game').gameRestart()
 
     def backToMenu(self):
+        if (self.changedSettings):
+            self.writeConfig()
         self.manager.current = 'menu'
 
 class GameEndModal(ModalView):
@@ -293,7 +314,9 @@ class DoodleWordGame(Screen):
 class DoodleWordApp(App):
     FONT_SCALE = 0.05
 
-    theme = DictProperty(ThemeManager.light_theme)
+    settings = {}
+
+    theme = DictProperty({})
     fontSize = NumericProperty(0)
 
     editions = {
@@ -342,6 +365,21 @@ class DoodleWordApp(App):
     def setEdition(self, mode):
         self.edition = self.editions[mode]
 
+    def setTheme(self, themeName):
+        if (themeName == 'light'):
+            self.theme = ThemeManager.light_theme
+        elif (themeName == 'dark'):
+            self.theme = ThemeManager.dark_theme
+
+    def readSettings(self):
+        config = configparser.ConfigParser()
+        thisFileDir = os.path.dirname(os.path.abspath(__file__))
+        configPath = os.path.join(thisFileDir, 'config.ini')
+        config.read(configPath)
+
+        themeName = config.get("Settings", "theme", fallback="light")
+        self.setTheme(themeName)
+
     def getRandomWord(self):
         return random.choice(self.edition['words'])
 
@@ -350,6 +388,8 @@ class DoodleWordApp(App):
 
     def build(self):
         Window.softinput_mode = 'below_target'
+
+        self.readSettings()
 
         sm = ScreenManager(transition=SwapTransition())
         sm.add_widget(DoodleWordMenu(name='menu'))
