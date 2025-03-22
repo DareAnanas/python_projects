@@ -56,8 +56,8 @@
         ThemedButton:
             text: 'Перезапустити гру'
             on_press: root.restartGame()
-        SpinBox:
-            id: spinBox
+        WordLengthSpinBox:
+            id: wordLengthSpinBox
             Button:
                 size_hint_x: 0.2
                 background_color: app.theme['button_bg']
@@ -83,7 +83,33 @@
                     size: 25, 25
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y      
-                
+        AttemptsSpinBox:
+            id: attemptsSpinBox
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.prevElement()
+                Image:
+                    source: app.theme['left_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+            Label:
+                size_hint_x: 0.6
+                font_size: app.fontSize
+                color: app.theme['text_color']
+                text: self.parent.items[self.parent.index][1]
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.nextElement()
+                Image:
+                    source: app.theme['right_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
         ThemedButton:
             text: 'Змінити тему'
             on_press: root.switchTheme()

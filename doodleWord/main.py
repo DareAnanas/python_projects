@@ -80,7 +80,7 @@ class DoodleWordMenu(Screen):
     def goToSettings(self):
         self.manager.current = 'settings'
     
-class SpinBox(BoxLayout):
+class WordLengthSpinBox(BoxLayout):
     app = None
     index = NumericProperty(1)
     items = ListProperty([])
@@ -102,6 +102,30 @@ class SpinBox(BoxLayout):
             return
         self.index -= 1
         self.app.setEdition(self.items[self.index][0])
+        self.app.root.get_screen('game').gameRestart()
+
+class AttemptsSpinBox(BoxLayout):
+    app = None
+    index = NumericProperty(5)
+    items = ListProperty([])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.app = App.get_running_app()
+        self.items = self.app.attemptsNames
+
+    def nextElement(self):
+        if (self.index + 1 >= len(self.items)):
+            return
+        self.index += 1
+        self.app.attempts = self.items[self.index][0]
+        self.app.root.get_screen('game').gameRestart()
+
+    def prevElement(self):
+        if (self.index <= 0):
+            return
+        self.index -= 1
+        self.app.attempts = self.items[self.index][0]
         self.app.root.get_screen('game').gameRestart()
 
 class DoodleWordSettings(Screen):
@@ -156,7 +180,8 @@ class DoodleWordGame(Screen):
     def gameStart(self):
         self.randomWord = self.app.getRandomWord()
         self.wordGrid.cols = self.app.edition['length']
-        for i in range(self.app.edition['length']*6):
+        self.wordGrid.rows = self.app.attempts
+        for i in range(self.app.edition['length']*self.app.attempts):
             themedLabel = ThemedLabel()
             self.gridLabels.append(themedLabel)
             self.wordGrid.add_widget(themedLabel)
@@ -250,7 +275,7 @@ class DoodleWordGame(Screen):
 
         if (self.inputWord == self.randomWord):
             self.gameEnd(state='victory')
-        elif (self.rowIndex >= 6):
+        elif (self.rowIndex >= self.app.attempts):
             self.gameEnd(state='defeat')
 
         print(self.wordHistory)
@@ -289,8 +314,21 @@ class DoodleWordApp(App):
         }
     }
 
-    defaultEdition = 'fiveLetter'
+    defaultAttempts = 6
+    attempts = defaultAttempts
 
+    attemptsNames = [
+        [1, '1 спроба'],
+        [2, '2 спроби'],
+        [3, '3 спроби'],
+        [4, '4 спроби'],
+        [5, '5 спроб'],
+        [6, '6 спроб'],
+        [7, '7 спроб'],
+        [8, '8 спроб']
+    ]
+
+    defaultEdition = 'fiveLetter'
     edition = editions[defaultEdition]
 
     editionsNames = [
