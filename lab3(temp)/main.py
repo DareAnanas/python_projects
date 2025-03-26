@@ -7,11 +7,35 @@ from kivy.properties import ObjectProperty, ListProperty, \
     BooleanProperty, NumericProperty
 
 class ListItem(GridLayout):
+    index = 0
     selected = BooleanProperty(False)
+    listGrid = ObjectProperty(None)
+
+    def __init__(self, listGrid, **kwargs):
+        super().__init__(**kwargs)
+        self.listGrid = listGrid
+
+    def toggle(self):
+        self.selected = not self.selected
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
-            self.selected = not self.selected
+            if (self.listGrid.selected_index == -1):
+                self.listGrid.selected_index = self.index
+                self.toggle()
+            elif (self.index != self.listGrid.selected_index):
+                self.listGrid.deselect()
+                self.listGrid.selected_index = self.index
+                self.toggle()
+            elif (self.index == self.listGrid.selected_index):
+                self.listGrid.selected_index = -1
+                self.toggle()
+
+class ListGrid(GridLayout):
+    selected_index = -1
+
+    def deselect(self):
+        self.children[len(self.children) - self.selected_index - 1].selected = False
 
 class Catalog(RelativeLayout):
     scrollView = ObjectProperty(None)
@@ -67,24 +91,42 @@ class Catalog(RelativeLayout):
         ['ViewSonic', 'XG2405', '2600', 'True']
     ]
 
-    def insertItem(self):
+    def getNewItem(self):
         name = self.newItemInput.text
         price = str(int(self.newItemSlider.value))
         status = self.newItemSpinner.text
-        item = [name, price, status]
-        self.items.append(item)
-        listItem = ListItem()
-        for element in item:
-            listItem.add_widget(Label(text=element))
-        self.listGrid.add_widget(listItem)
+        return [name, price, status]
+
+    def insertItem(self):
+        item = self.getNewItem()
+        selected_index = len(self.listGrid.children) - 1
+        if (self.listGrid.selected_index == -1):
+            self.items.append(item)
+            listItem = ListItem(self.listGrid)
+            for element in item:
+                listItem.add_widget(Label(text=element))
+            self.listGrid.add_widget(listItem)
+        else:
+            self.items.insert(self.listGrid.selected_index, item)
+            listItem = ListItem(self.listGrid)
+            for element in item:
+                listItem.add_widget(Label(text=element))
+            self.listGrid.add_widget(listItem, len(self.listGrid.children) - self.listGrid.selected_index - 1)
+        for i, listItem in enumerate(self.listGrid.children):
+            listItem.index = len(self.listGrid.children) - i - 1
+
+
 
     def on_kv_post(self, base_widget):
         self.scrollView.bind(scroll_y=self.updateSlider)
-        for row in self.items:
-            listItem = ListItem()
+        for i, row in enumerate(self.items):
+            listItem = ListItem(self.listGrid)
+            listItem.index = i
             for item in row:
                 listItem.add_widget(Label(text=item))
             self.listGrid.add_widget(listItem)
+        for i, listItem in enumerate(self.listGrid.children):
+            print(len(self.listGrid.children) - listItem.index)
             
 
     def updateSlider(self, instance, value):

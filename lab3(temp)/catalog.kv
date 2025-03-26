@@ -66,34 +66,34 @@
                     do_scroll_y: True
                     bar_width: 0
                     size_hint_x: 0.9
-                    GridLayout:
+                    ListGrid:
                         id: listGrid
                         cols: 1
                         size_hint_y: None
                         height: self.minimum_height
-                        ListItem:
-                            cols: 3
-                            rows: 1
-                            Label:
-                                text: 'Назва товару 1'
-                            Label:
-                                text: '3000'
-                            Label:
-                                text: 'True'
-                        ListItem:
-                            Label:
-                                text: 'Назва товару 2'
-                            Label:
-                                text: '4000'
-                            Label:
-                                text: 'False'
-                        ListItem:
-                            Label:
-                                text: 'Назва товару 3'
-                            Label:
-                                text: '5000'
-                            Label:
-                                text: 'True'
+                        # ListItem:
+                        #     cols: 3
+                        #     rows: 1
+                        #     Label:
+                        #         text: 'Назва товару 1'
+                        #     Label:
+                        #         text: '3000'
+                        #     Label:
+                        #         text: 'True'
+                        # ListItem:
+                        #     Label:
+                        #         text: 'Назва товару 2'
+                        #     Label:
+                        #         text: '4000'
+                        #     Label:
+                        #         text: 'False'
+                        # ListItem:
+                        #     Label:
+                        #         text: 'Назва товару 3'
+                        #     Label:
+                        #         text: '5000'
+                        #     Label:
+                        #         text: 'True'
                 Slider:
                     id: scrollBar
                     orientation: 'vertical'
