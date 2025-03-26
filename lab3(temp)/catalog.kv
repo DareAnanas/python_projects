@@ -1,0 +1,149 @@
+<ListItem>:
+    cols: 3
+    rows: 1
+    size_hint_y: None
+    height: app.listItemHeight
+    canvas.before:
+        Color:
+            rgba: app.colors['graySelected'] if self.selected else app.colors['lightGray']
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<Catalog>:
+    scrollView: scrollView
+    scrollBar: scrollBar
+    listGrid: listGrid
+    newItemInput: newItemInput
+    newItemSlider: newItemSlider
+    newItemSpinner: newItemSpinner
+    
+    BoxLayout:
+        id: mainLayout
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 10
+        BoxLayout:
+            id: listHeaderLayout
+            orientation: 'vertical'
+            size_hint_y: 0.6
+            canvas.before:
+                Color:
+                    rgba: app.colors['gray']
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: app.listItemHeight
+                GridLayout:
+                    id: listHeader
+                    cols: 3
+                    rows: 1
+                    size_hint_x: 0.9
+                    Label:
+                        text: 'Назва'
+                    Label:
+                        text: 'Ціна'
+                    Label:
+                        text: 'Статус'
+                Label:
+                    size_hint_x: 0.1
+                    canvas.before:
+                        Color:
+                            rgba: app.colors['gray']
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+            BoxLayout:
+                orientation: 'horizontal'
+
+                ScrollView:
+                    id: scrollView
+                    do_scroll_x: False
+                    do_scroll_y: True
+                    bar_width: 0
+                    size_hint_x: 0.9
+                    GridLayout:
+                        id: listGrid
+                        cols: 1
+                        size_hint_y: None
+                        height: self.minimum_height
+                        ListItem:
+                            cols: 3
+                            rows: 1
+                            Label:
+                                text: 'Назва товару 1'
+                            Label:
+                                text: '3000'
+                            Label:
+                                text: 'True'
+                        ListItem:
+                            Label:
+                                text: 'Назва товару 2'
+                            Label:
+                                text: '4000'
+                            Label:
+                                text: 'False'
+                        ListItem:
+                            Label:
+                                text: 'Назва товару 3'
+                            Label:
+                                text: '5000'
+                            Label:
+                                text: 'True'
+                Slider:
+                    id: scrollBar
+                    orientation: 'vertical'
+                    size_hint_x: 0.1
+                    min: 0
+                    max: 1
+                    value: 1
+                    on_value: scrollView.scroll_y = self.value
+        Label:
+            text: 'Параметри товару'
+            size_hint_y: 0.1
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            TextInput:
+                id: newItemInput
+                text: 'Новий товар'
+            FloatLayout:
+                Label:
+                    id: sliderValueLabel
+                    text: '0'
+                    pos: [self.parent.pos[0], self.parent.pos[1] - 20]
+                Slider:
+                    id: newItemSlider
+                    orientation: 'horizontal'
+                    min: 0
+                    max: 5000
+                    value: 0
+                    pos: self.parent.pos
+                    on_value: sliderValueLabel.text = f"{int(self.value)}"
+
+            Spinner:
+                id: newItemSpinner
+                text: 'True'
+                values: ['True', 'False']
+        Label:
+            size_hint_y: 0.1
+            text: 'Кнопки управління'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Button:
+                text: 'Insert'
+                on_press: root.insertItem()
+            Button:
+                text: 'Delete'
+            Button:
+                text: 'Get'
+            Button:
+                text: 'Set'
+                
+        
+

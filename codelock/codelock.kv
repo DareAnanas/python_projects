@@ -1,0 +1,60 @@
+<ThemedButton@Button>:
+    font_size: 30
+
+<CodeLockButton@ThemedButton>:
+    on_press: app.root.get_screen('codelock').handleDigit(self.text)
+
+<BackButton@ThemedButton>:
+    on_press: app.root.get_screen('codelock').handleBack()
+    background_color: 'yellow'
+
+<EnterButton@ThemedButton>:
+    on_press: app.root.get_screen('codelock').handleEnter()
+    background_color: 'green'
+
+<CodeLock>:
+    displayLabel: displayLabel
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 50]
+        spacing: 20
+        Label:
+            id: displayLabel
+            text: 'Введіть код'
+            font_size: 30
+            size_hint_y: 0.3
+            canvas.before:
+                Color:
+                    rgba: [0.1216, 0.1216, 0.1216, 1]
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+        GridLayout:
+            cols: 3
+            rows: 4
+            spacing: 5
+            size_hint_y: 0.7
+            CodeLockButton:
+                text: '7'
+            CodeLockButton:
+                text: '8'
+            CodeLockButton:
+                text: '9'
+            CodeLockButton:
+                text: '4'
+            CodeLockButton:
+                text: '5'
+            CodeLockButton:
+                text: '6'
+            CodeLockButton:
+                text: '1'
+            CodeLockButton:
+                text: '2'
+            CodeLockButton:
+                text: '3'
+            BackButton:
+                text: 'Back'
+            CodeLockButton:
+                text: '0'
+            EnterButton:
+                text: 'Enter'

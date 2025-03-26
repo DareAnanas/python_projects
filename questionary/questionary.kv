@@ -1,0 +1,99 @@
+<Questionary>:
+    textInput: textInput
+    spinBox: spinBox
+    spinner: spinner
+    resultsLabel: resultsLabel
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 60]
+        spacing: 10
+        TextInput:
+            id: textInput
+            size_hint_y: 0.6
+        Label:
+            text: 'Select an option:'
+            size_hint_y: 0.6
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout: 
+                CheckBox:
+                    id: radioButton1
+                    group: 'options'
+                    size_hint_x: None
+                Label:
+                    text: app.items[0]
+                    size_hint_x: None
+            BoxLayout: 
+                CheckBox:
+                    id: radioButton2
+                    group: 'options'
+                    size_hint_x: None
+                Label:
+                    text: app.items[1]
+                    size_hint_x: None
+            BoxLayout: 
+                CheckBox:
+                    id: radioButton3
+                    group: 'options'
+                    size_hint_x: None
+                Label:
+                    text: app.items[2]
+                    size_hint_x: None
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout: 
+                CheckBox:
+                    id: checkBox1
+                    size_hint_x: None
+                Label:
+                    text: app.items[0]
+                    size_hint_x: None
+            BoxLayout: 
+                CheckBox:
+                    id: checkBox2
+                    size_hint_x: None
+                Label:
+                    text: app.items[1]
+                    size_hint_x: None
+            BoxLayout: 
+                CheckBox:
+                    id: checkBox3
+                    size_hint_x: None
+                Label:
+                    text: app.items[2]
+                    size_hint_x: None
+        SpinBox:
+            id: spinBox
+            size_hint_y: 0.6
+            TextInput:
+                size_hint_x: 0.9
+                readonly: True
+                text: self.parent.items[self.parent.index]
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_x: 0.1
+                Button:
+                    on_press: self.parent.parent.nextElement()
+                    Image:
+                        source: 'upArrow.png'
+                        size: 20, 20
+                        center_x: self.parent.center_x
+                        center_y: self.parent.center_y
+                Button:
+                    on_press: self.parent.parent.prevElement()
+                    Image:
+                        source: 'downArrow.png'
+                        size: 20, 20
+                        center_x: self.parent.center_x
+                        center_y: self.parent.center_y
+        Spinner:
+            id: spinner
+            size_hint_y: 0.6
+            text: app.items[0]
+            values: app.items
+        Label:
+            id: resultsLabel
+            text: 'Press Get Values to see results'
+        Button:
+            text: 'Get Values'
+            on_press: root.getValues()
