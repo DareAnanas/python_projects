@@ -42,10 +42,52 @@
             text: 'Вийти з гри'
             on_press: app.stop()
 
+<UserWordModal>:
+    size_hint: 0.5, 0.5
+    auto_dismiss: False
+    background: ''
+    background_color: app.theme['bg_color']
+    wordInput: wordInput
+    infoLabel: infoLabel
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 10]
+        spacing: 20
+        Label:
+            id: infoLabel
+            text: root.title
+            font_size: app.fontSize / 2
+            color: app.theme['text_color']
+        TextInput:
+            id: wordInput
+            font_size: app.fontSize / 2
+            background_color: app.theme['input_bg']
+            foreground_color: app.theme['text_color']
+            cursor_color: app.theme['text_color']
+            background_normal: ''
+            multiline: False
+            canvas.before:
+                Color:
+                    rgba: app.theme['stroke_color']
+                Line:
+                    width: 2
+                    rectangle: self.x, self.y, self.width, self.height
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 5
+            ThemedButton:
+                text: 'Скасувати'
+                font_size: app.fontSize / 2
+                on_press: root.dismiss()
+            ThemedButton:
+                text: 'Загадати'
+                font_size: app.fontSize / 2
+                on_press: root.writeUserWord()
+
 <DoodleWordSettings>:
     BoxLayout:
         orientation: 'vertical'
-        padding: [200, 100]
+        padding: [200, 50]
         spacing: 30
         canvas.before:
             Color:
@@ -56,6 +98,9 @@
         ThemedButton:
             text: 'Перезапустити гру'
             on_press: root.restartGame()
+        ThemedButton:
+            text: 'Загадати слово'
+            on_press: root.openUserWordModal()
         WordLengthSpinBox:
             id: wordLengthSpinBox
             Button:
@@ -169,6 +214,7 @@
             foreground_color: app.theme['text_color']
             cursor_color: app.theme['text_color']
             background_normal: ''
+            multiline: False
             canvas.before:
                 Color:
                     rgba: app.theme['stroke_color']

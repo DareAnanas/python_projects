@@ -8,10 +8,11 @@ from kivy.properties import DictProperty, NumericProperty, \
 ObjectProperty, ListProperty, StringProperty, ColorProperty
 from kivy.core.window import Window
 from kivy.factory import Factory
+from kivy.clock import Clock
 import random
 import configparser
 import os
-from words import fiveLetterWords, sixLetterWords
+from words import fourLetterWords, fiveLetterWords, sixLetterWords, sevenLetterWords
 
 from kivy.uix.textinput import TextInput
 
@@ -131,8 +132,69 @@ class AttemptsSpinBox(BoxLayout):
         self.app.attempts = self.items[self.index][0]
         self.app.root.get_screen('game').gameRestart()
 
-class DoodleWordSettings(Screen):
+class UserWordModal(ModalView):
+    title = StringProperty('Загадай слово')
+    wordInput = ObjectProperty(None)
+    infoLabel = ObjectProperty(None)
 
+    def on_kv_post(self, base_widget):
+        self.app = App.get_running_app()
+
+    def setInfoLabelColorForTime(self, color, time):
+        self.infoLabel.color = color
+        Clock.schedule_once(self.revertHintLabelColor, time)
+
+    def revertHintLabelColor(self, dt):
+        self.infoLabel.color = self.app.theme['text_color']
+
+    def isUkrainianWord(self, word):
+        ukrainianLetters = set("абвгґдеєжзиіїйклмнопрстуфхцчшщьюя")
+        apostropheCount = 0
+
+        for char in word:
+            if (char not in ukrainianLetters):
+                return False
+
+        return True
+
+    def hasTooManyApostrophes(self, word):
+        apostropheCount = 0
+
+        for char in word:
+            if (char == "'"):
+                apostropheCount += 1
+                if (apostropheCount > 1):
+                    return True
+        
+        return False
+
+    def writeUserWord(self):
+        if (len(self.wordInput.text) != self.app.edition['length']):
+            if (self.app.edition['length'] == 4):
+                self.title = "Слово має мати 4 букви"
+            else:
+                self.title = f"Слово має мати {self.app.edition['length']} букв"
+            self.setInfoLabelColorForTime(self.app.theme['defeat_color'], 0.5)
+            return
+
+        inputWord = self.wordInput.text.lower()
+
+        if (self.hasTooManyApostrophes(inputWord)):
+            self.title = "Слово містить забагато апострофів"
+            self.setInfoLabelColorForTime(self.app.theme['defeat_color'], 0.5)
+            return
+
+        if (not self.isUkrainianWord(inputWord)):
+            self.title = "Слово містить не українські символи"
+            self.setInfoLabelColorForTime(self.app.theme['defeat_color'], 0.5)
+            return
+
+        self.app.userWord = inputWord
+        self.app.root.get_screen('game').gameRestart()
+
+        self.dismiss()
+
+class DoodleWordSettings(Screen):
     changedSettings = False
 
     def on_kv_post(self, base_widget):
@@ -157,6 +219,10 @@ class DoodleWordSettings(Screen):
         configPath = os.path.join(thisFileDir, 'config.ini')
         with open(configPath, 'w') as file:
             config.write(file)
+
+    def openUserWordModal(self):
+        userWordModal = UserWordModal()
+        userWordModal.open()
 
     def restartGame(self):
         self.app.root.get_screen('game').gameRestart()
@@ -280,7 +346,8 @@ class DoodleWordGame(Screen):
         self.inputWord = self.getInputWord()
         if (len(self.inputWord) != self.app.edition['length']):
             return
-        if (self.inputWord not in self.app.edition['words']):
+        if (self.inputWord != self.randomWord and 
+            self.inputWord not in self.app.edition['words']):
             return
 
         self.wordHistory.append(self.inputWord)
@@ -322,7 +389,7 @@ class DoodleWordApp(App):
     editions = {
         'fourLetter': {
             'length': 4,
-            'words': ['піна', 'роса', 'баня', 'гора', 'лихо']
+            'words': fourLetterWords
         },
         'fiveLetter': {
             'length': 5,
@@ -334,7 +401,7 @@ class DoodleWordApp(App):
         },
         'sevenLetter': {
             'length': 7,
-            'words': ['барабан', 'ракетка', 'локшина', 'будинок', 'вершина']
+            'words': sevenLetterWords
         }
     }
 
@@ -362,6 +429,8 @@ class DoodleWordApp(App):
         ['sevenLetter','7 букв']
     ]
 
+    userWord = 'ааааа'
+
     def setEdition(self, mode):
         self.edition = self.editions[mode]
 
@@ -381,6 +450,10 @@ class DoodleWordApp(App):
         self.setTheme(themeName)
 
     def getRandomWord(self):
+        if (self.userWord != ''):
+            userWord = self.userWord
+            self.userWord = ''
+            return userWord
         return random.choice(self.edition['words'])
 
     def onWindowResize(self, window, size):
