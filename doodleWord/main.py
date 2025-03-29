@@ -124,7 +124,6 @@ class AttemptsSpinBox(BoxLayout):
         self.index += 1
         self.app.attempts = self.items[self.index][0]
         self.app.root.get_screen('settings').changedSessionSettings = True
-        self.app.clearUserWord()
 
     def prevElement(self):
         if (self.index <= 0):
@@ -132,7 +131,6 @@ class AttemptsSpinBox(BoxLayout):
         self.index -= 1
         self.app.attempts = self.items[self.index][0]
         self.app.root.get_screen('settings').changedSessionSettings = True
-        self.app.clearUserWord()
 
 class UserWordModal(ModalView):
     title = StringProperty('Загадай слово')
