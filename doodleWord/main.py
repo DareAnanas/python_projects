@@ -66,9 +66,13 @@ class ThemedLabel(Label):
     bg_color = ListProperty([1, 1, 1, 1])
 
     def __init__(self, **kwargs):
+        self.app = App.get_running_app()
         super().__init__(**kwargs)
-        self.bg_color = App.get_running_app().theme['button_bg']
-        
+        self.bg_color = self.app.theme['button_bg']
+        self.app.bind(theme=self.updateTheme)
+
+    def updateTheme(self, instance, value):
+        self.bg_color = value['button_bg']
 
 class DoodleWordMenu(Screen):
 
