@@ -101,14 +101,14 @@ class WordLengthSpinBox(BoxLayout):
             return
         self.index += 1
         self.app.setEdition(self.items[self.index][0])
-        self.app.root.get_screen('game').gameRestart()
+        self.app.root.get_screen('settings').setChangedSessionSettings()
 
     def prevElement(self):
         if (self.index <= 0):
             return
         self.index -= 1
         self.app.setEdition(self.items[self.index][0])
-        self.app.root.get_screen('game').gameRestart()
+        self.app.root.get_screen('settings').setChangedSessionSettings()
 
 class AttemptsSpinBox(BoxLayout):
     app = None
@@ -125,14 +125,14 @@ class AttemptsSpinBox(BoxLayout):
             return
         self.index += 1
         self.app.attempts = self.items[self.index][0]
-        self.app.root.get_screen('game').gameRestart()
+        self.app.root.get_screen('settings').setChangedSessionSettings()
 
     def prevElement(self):
         if (self.index <= 0):
             return
         self.index -= 1
         self.app.attempts = self.items[self.index][0]
-        self.app.root.get_screen('game').gameRestart()
+        self.app.root.get_screen('settings').setChangedSessionSettings()
 
 class UserWordModal(ModalView):
     title = StringProperty('Загадай слово')
@@ -192,7 +192,8 @@ class UserWordModal(ModalView):
             return
 
         self.app.userWord = inputWord
-        self.app.root.get_screen('game').gameRestart()
+        self.app.root.get_screen('settings').userWordSetted = True
+        self.app.root.get_screen('settings').changedSessionSettings = True
 
         self.dismiss()
 
@@ -228,11 +229,23 @@ class DoodleWordSettings(Screen):
         userWordModal = UserWordModal()
         userWordModal.open()
 
+    def setChangedSessionSettings(self):
+        self.changedSessionSettings = True
+        self.app.userWord = ''
+        self.userWordSetted = False
+
+    def restartGameButtonAction(self):
+        self.changedSessionSettings = False
+        self.app.userWord = ''
+        self.userWordSetted = False
+        self.restartGame()
+
     def restartGame(self):
         self.app.root.get_screen('game').gameRestart()
 
     def backToMenu(self):
         if (self.changedSessionSettings):
+            self.changedSessionSettings = False
             self.restartGame()
         if (self.changedSettings):
             self.writeConfig()
