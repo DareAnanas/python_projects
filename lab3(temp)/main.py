@@ -10,7 +10,6 @@ class ListItem(GridLayout):
     index = 0
     selected = BooleanProperty(False)
     listGrid = ObjectProperty(None)
-
     def __init__(self, listGrid, **kwargs):
         super().__init__(**kwargs)
         self.listGrid = listGrid
@@ -34,8 +33,11 @@ class ListItem(GridLayout):
 class ListGrid(GridLayout):
     selected_index = -1
 
+    def reverseIndex(self, index):
+        return len(self.children) - index - 1
+
     def deselect(self):
-        self.children[len(self.children) - self.selected_index - 1].selected = False
+        self.children[self.reverseIndex(self.selected_index)].selected = False
 
 class Catalog(RelativeLayout):
     scrollView = ObjectProperty(None)
@@ -99,23 +101,22 @@ class Catalog(RelativeLayout):
 
     def insertItem(self):
         item = self.getNewItem()
-        selected_index = len(self.listGrid.children) - 1
-        if (self.listGrid.selected_index == -1):
-            self.items.append(item)
-            listItem = ListItem(self.listGrid)
-            for element in item:
-                listItem.add_widget(Label(text=element))
-            self.listGrid.add_widget(listItem)
-        else:
-            self.items.insert(self.listGrid.selected_index, item)
-            listItem = ListItem(self.listGrid)
-            for element in item:
-                listItem.add_widget(Label(text=element))
-            self.listGrid.add_widget(listItem, len(self.listGrid.children) - self.listGrid.selected_index - 1)
+        selected_index = self.listGrid.reverseIndex(0)
+        if (self.listGrid.selected_index != -1):
+            selected_index = self.listGrid.selected_index
+        self.items.insert(selected_index, item)
+        listItem = ListItem(self.listGrid)
+        for element in item:
+            listItem.add_widget(Label(text=element))
+        self.listGrid.add_widget(listItem, self.listGrid.reverseIndex(selected_index))
         for i, listItem in enumerate(self.listGrid.children):
-            listItem.index = len(self.listGrid.children) - i - 1
+            listItem.index = self.listGrid.reverseIndex(i)
 
-
+    def deleteItem(self):
+        selected_index = self.listGrid.reverseIndex(0)
+        if (self.listGrid.selected_index != -1):
+            selected_index = self.listGrid.selected_index
+        
 
     def on_kv_post(self, base_widget):
         self.scrollView.bind(scroll_y=self.updateSlider)
@@ -125,8 +126,6 @@ class Catalog(RelativeLayout):
             for item in row:
                 listItem.add_widget(Label(text=item))
             self.listGrid.add_widget(listItem)
-        for i, listItem in enumerate(self.listGrid.children):
-            print(len(self.listGrid.children) - listItem.index)
             
 
     def updateSlider(self, instance, value):
