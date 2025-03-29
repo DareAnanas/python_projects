@@ -98,9 +98,24 @@
         ThemedButton:
             text: 'Перезапустити гру'
             on_press: root.restartGame()
-        ThemedButton:
-            text: 'Загадати слово'
-            on_press: root.openUserWordModal()
+        FloatLayout:
+            ThemedButton:
+                pos: self.parent.pos
+                text: 'Загадати слово'
+                on_press: root.openUserWordModal()
+            Label:
+                right: self.parent.right
+                top: self.parent.top
+                # pos: [self.parent.right - 20, self.parent.top - 20]
+                size_hint: [None, None]
+                size: [20, 20]
+                canvas.before:
+                    Color:
+                        rgba: app.theme['changed_color'] if root.changedUserWord else [0,0,0,0]
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+                
         WordLengthSpinBox:
             id: wordLengthSpinBox
             Button:

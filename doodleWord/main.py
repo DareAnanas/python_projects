@@ -5,7 +5,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.modalview import ModalView
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import DictProperty, NumericProperty, \
-ObjectProperty, ListProperty, StringProperty, ColorProperty
+ObjectProperty, ListProperty, StringProperty, ColorProperty, BooleanProperty
 from kivy.core.window import Window
 from kivy.factory import Factory
 from kivy.clock import Clock
@@ -50,7 +50,8 @@ class ThemeManager:
         'victory_color': ColorConverter.hexToRgba('#00C300'),
         'defeat_color': ColorConverter.hexToRgba('#FF0000'),
         'left_arrow_image': 'left_arrow_light.png',
-        'right_arrow_image': 'right_arrow_light.png'
+        'right_arrow_image': 'right_arrow_light.png',
+        'changed_color': ColorConverter.hexToRgba('#C16565')
     }
     dark_theme = {
         'bg_color': ColorConverter.hexToRgba('#1E1E1E'),
@@ -65,7 +66,8 @@ class ThemeManager:
         'victory_color': ColorConverter.hexToRgba('#008000'),
         'defeat_color': ColorConverter.hexToRgba('#FF0000'),
         'left_arrow_image': 'left_arrow_dark.png',
-        'right_arrow_image': 'right_arrow_dark.png'
+        'right_arrow_image': 'right_arrow_dark.png',
+        'changed_color': ColorConverter.hexToRgba('#EC9D75')
     }
 
 class ThemedLabel(Label):
@@ -195,7 +197,9 @@ class UserWordModal(ModalView):
         self.dismiss()
 
 class DoodleWordSettings(Screen):
+    userWordSetted = BooleanProperty(False)
     changedSettings = False
+    changedSessionSettings = False
 
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
@@ -228,6 +232,8 @@ class DoodleWordSettings(Screen):
         self.app.root.get_screen('game').gameRestart()
 
     def backToMenu(self):
+        if (self.changedSessionSettings):
+            self.restartGame()
         if (self.changedSettings):
             self.writeConfig()
         self.manager.current = 'menu'
@@ -429,7 +435,7 @@ class DoodleWordApp(App):
         ['sevenLetter','7 букв']
     ]
 
-    userWord = 'ааааа'
+    userWord = ''
 
     def setEdition(self, mode):
         self.edition = self.editions[mode]
@@ -458,6 +464,7 @@ class DoodleWordApp(App):
 
     def onWindowResize(self, window, size):
         self.fontSize = size[0] * self.FONT_SCALE
+        print(self.fontSize)
 
     def build(self):
         Window.softinput_mode = 'below_target'
