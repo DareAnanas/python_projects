@@ -101,14 +101,16 @@ class WordLengthSpinBox(BoxLayout):
             return
         self.index += 1
         self.app.setEdition(self.items[self.index][0])
-        self.app.root.get_screen('settings').setChangedSessionSettings()
+        self.app.root.get_screen('settings').changedSessionSettings = True
+        self.app.clearUserWord()
 
     def prevElement(self):
         if (self.index <= 0):
             return
         self.index -= 1
         self.app.setEdition(self.items[self.index][0])
-        self.app.root.get_screen('settings').setChangedSessionSettings()
+        self.app.root.get_screen('settings').changedSessionSettings = True
+        self.app.clearUserWord()
 
 class AttemptsSpinBox(BoxLayout):
     app = None
@@ -125,14 +127,16 @@ class AttemptsSpinBox(BoxLayout):
             return
         self.index += 1
         self.app.attempts = self.items[self.index][0]
-        self.app.root.get_screen('settings').setChangedSessionSettings()
+        self.app.root.get_screen('settings').changedSessionSettings = True
+        self.app.clearUserWord()
 
     def prevElement(self):
         if (self.index <= 0):
             return
         self.index -= 1
         self.app.attempts = self.items[self.index][0]
-        self.app.root.get_screen('settings').setChangedSessionSettings()
+        self.app.root.get_screen('settings').changedSessionSettings = True
+        self.app.clearUserWord()
 
 class UserWordModal(ModalView):
     title = StringProperty('Загадай слово')
@@ -191,14 +195,12 @@ class UserWordModal(ModalView):
             self.setInfoLabelColorForTime(self.app.theme['defeat_color'], 0.5)
             return
 
-        self.app.userWord = inputWord
-        self.app.root.get_screen('settings').userWordSetted = True
+        self.app.setUserWord(inputWord)
         self.app.root.get_screen('settings').changedSessionSettings = True
 
         self.dismiss()
 
 class DoodleWordSettings(Screen):
-    userWordSetted = BooleanProperty(False)
     changedSettings = False
     changedSessionSettings = False
 
@@ -229,15 +231,9 @@ class DoodleWordSettings(Screen):
         userWordModal = UserWordModal()
         userWordModal.open()
 
-    def setChangedSessionSettings(self):
-        self.changedSessionSettings = True
-        self.app.userWord = ''
-        self.userWordSetted = False
-
     def restartGameButtonAction(self):
         self.changedSessionSettings = False
-        self.app.userWord = ''
-        self.userWordSetted = False
+        self.app.clearUserWord()
         self.restartGame()
 
     def restartGame(self):
@@ -264,7 +260,6 @@ class GameEndModal(ModalView):
 
     def restartGame(self, instance):
         self.dismiss()
-        App.get_running_app().root.get_screen('settings').userWordSetted = False
         App.get_running_app().root.get_screen('game').gameRestart()
 
 class DoodleWordGame(Screen):
@@ -450,6 +445,7 @@ class DoodleWordApp(App):
     ]
 
     userWord = ''
+    userWordSetted = BooleanProperty(False)
 
     def setEdition(self, mode):
         self.edition = self.editions[mode]
@@ -459,6 +455,14 @@ class DoodleWordApp(App):
             self.theme = ThemeManager.light_theme
         elif (themeName == 'dark'):
             self.theme = ThemeManager.dark_theme
+
+    def setUserWord(self, word):
+        self.userWord = word
+        self.userWordSetted = True
+
+    def clearUserWord(self):
+        self.userWord = ''
+        self.userWordSetted = False
 
     def readSettings(self):
         config = configparser.ConfigParser()
@@ -472,7 +476,7 @@ class DoodleWordApp(App):
     def getRandomWord(self):
         if (self.userWord != ''):
             userWord = self.userWord
-            self.userWord = ''
+            self.clearUserWord()
             return userWord
         return random.choice(self.edition['words'])
 

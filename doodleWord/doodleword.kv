@@ -111,7 +111,7 @@
                 size: [20, 20]
                 canvas.before:
                     Color:
-                        rgba: app.theme['changed_color'] if root.userWordSetted else [0,0,0,0]
+                        rgba: app.theme['changed_color'] if app.userWordSetted else [0,0,0,0]
                     Ellipse:
                         pos: self.pos
                         size: self.size
