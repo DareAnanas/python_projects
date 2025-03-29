@@ -264,6 +264,7 @@ class GameEndModal(ModalView):
 
     def restartGame(self, instance):
         self.dismiss()
+        App.get_running_app().root.get_screen('settings').userWordSetted = False
         App.get_running_app().root.get_screen('game').gameRestart()
 
 class DoodleWordGame(Screen):
