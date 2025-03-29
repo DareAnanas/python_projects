@@ -6,7 +6,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import DictProperty, NumericProperty, \
 ObjectProperty, ListProperty, StringProperty, ColorProperty, BooleanProperty
 from kivy.core.window import Window
-from kivy.factory import Factory
 from kivy.clock import Clock
 import random
 import configparser
@@ -311,7 +310,7 @@ class DoodleWordGame(Screen):
             )
             gameEndModal.open()
         else:
-            print('Розробник лох')
+            print('Розробник попуск')
 
     def bindGameActions(self):
         self.confirmWordButton.bind(on_press=self.guessWord)
@@ -375,10 +374,6 @@ class DoodleWordGame(Screen):
             self.gameEnd(state='victory')
         elif (self.rowIndex >= self.app.attempts):
             self.gameEnd(state='defeat')
-
-        print(self.wordHistory)
-        print('Pierd')
-
 
     def getInputWord(self):
         return self.wordInput.text.strip().lower()
@@ -476,7 +471,6 @@ class DoodleWordApp(App):
 
     def onWindowResize(self, window, size):
         self.fontSize = size[0] * self.FONT_SCALE
-        print(self.fontSize)
 
     def build(self):
         Window.softinput_mode = 'below_target'
