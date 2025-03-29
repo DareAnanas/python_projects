@@ -1,7 +1,6 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
 from kivy.uix.label import Label
-from kivy.uix.popup import Popup
 from kivy.uix.modalview import ModalView
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import DictProperty, NumericProperty, \
@@ -14,11 +13,8 @@ import configparser
 import os
 from words import fourLetterWords, fiveLetterWords, sixLetterWords, sevenLetterWords
 
-from kivy.uix.textinput import TextInput
-
 
 class ColorConverter:
-
     def hexToRgba(hex_color, alpha=1):
         # Convert a hex color string to an RGBA tuple (0-1 range).
         hex_color = hex_color.lstrip("#")
@@ -30,10 +26,6 @@ class ColorConverter:
         '#1E1E1E': [30, 30, 30, 1],
         '#EC9D75': [236, 157, 117, 1],
         '#C16565': [193, 101, 101, 1]
-    }
-
-    cssColorsRgbaDict = {
-
     }
 
 class ThemeManager:
