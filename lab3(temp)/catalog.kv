@@ -10,14 +10,36 @@
             pos: self.pos
             size: self.size
 
+<ListGrid>:
+    cols: 1
+    size_hint_y: None
+    height: self.minimum_height
+
+<WrapperItem>:
+    cols: 3
+    rows: 1
+    size_hint_y: None
+    height: app.listItemHeight
+    canvas.before:
+        Color:
+            rgba: app.colors['graySelected'] if self.selected else app.colors['lightGray']
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<Wrapper>:
+    cols: 1
+    size_hint_y: None
+    height: self.minimum_height
+
 <Catalog>:
     scrollView: scrollView
     scrollBar: scrollBar
-    listGrid: listGrid
     newItemInput: newItemInput
     newItemSlider: newItemSlider
     newItemSpinner: newItemSpinner
-    
+    wrapper: wrapper
+
     BoxLayout:
         id: mainLayout
         orientation: 'vertical'
@@ -66,34 +88,8 @@
                     do_scroll_y: True
                     bar_width: 0
                     size_hint_x: 0.9
-                    ListGrid:
-                        id: listGrid
-                        cols: 1
-                        size_hint_y: None
-                        height: self.minimum_height
-                        # ListItem:
-                        #     cols: 3
-                        #     rows: 1
-                        #     Label:
-                        #         text: 'Назва товару 1'
-                        #     Label:
-                        #         text: '3000'
-                        #     Label:
-                        #         text: 'True'
-                        # ListItem:
-                        #     Label:
-                        #         text: 'Назва товару 2'
-                        #     Label:
-                        #         text: '4000'
-                        #     Label:
-                        #         text: 'False'
-                        # ListItem:
-                        #     Label:
-                        #         text: 'Назва товару 3'
-                        #     Label:
-                        #         text: '5000'
-                        #     Label:
-                        #         text: 'True'
+                    Wrapper:
+                        id: wrapper
                 Slider:
                     id: scrollBar
                     orientation: 'vertical'
@@ -140,6 +136,7 @@
                 on_press: root.insertItem()
             Button:
                 text: 'Delete'
+                on_press: root.deleteItem()
             Button:
                 text: 'Get'
             Button:

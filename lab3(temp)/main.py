@@ -5,6 +5,9 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.properties import ObjectProperty, ListProperty, \
     BooleanProperty, NumericProperty
+from kivy.uix.accordion import Accordion, AccordionItem
+from kivy.clock import Clock
+
 
 class ListItem(GridLayout):
     index = 0
@@ -18,6 +21,8 @@ class ListItem(GridLayout):
         self.selected = not self.selected
 
     def on_touch_down(self, touch):
+        if (self.listGrid.collapsed):
+            return
         if self.collide_point(*touch.pos):
             if (self.listGrid.selected_index == -1):
                 self.listGrid.selected_index = self.index
@@ -32,6 +37,25 @@ class ListItem(GridLayout):
 
 class ListGrid(GridLayout):
     selected_index = -1
+    collapsed = False
+
+    def __init__(self, items, **kwargs):
+        super().__init__(**kwargs)
+        for i, row in enumerate(items):
+            listItem = ListItem(self)
+            listItem.index = i
+            for item in row:
+                listItem.add_widget(Label(text=item))
+            self.add_widget(listItem)
+
+    def setCollapse(self, collapse):
+        self.collapsed = collapse
+        if (collapse):
+            self.height = 0
+            self.opacity = 0
+        if (not collapse):
+            self.height = self.minimum_height
+            self.opacity = 1
 
     def reverseIndex(self, index):
         return len(self.children) - index - 1
@@ -39,36 +63,90 @@ class ListGrid(GridLayout):
     def deselect(self):
         self.children[self.reverseIndex(self.selected_index)].selected = False
 
+    def insertItem(self, item):
+        selected_index = self.reverseIndex(0)
+        if (self.selected_index != -1):
+            selected_index = self.selected_index
+        listItem = ListItem(self)
+        for element in item:
+            listItem.add_widget(Label(text=element))
+        self.add_widget(listItem, self.reverseIndex(selected_index))
+        self.updateIndices()
+
+    def deleteItem(self):
+        selected_index = self.reverseIndex(0)
+        if (self.selected_index != -1):
+            selected_index = self.selected_index
+        print(self.reverseIndex(self.selected_index))
+        self.remove_widget(self.children[self.reverseIndex(selected_index)])
+        self.updateIndices()
+
+    def updateIndices(self):
+        for i, listItem in enumerate(self.children):
+            listItem.index = self.reverseIndex(i)
+
+
+class WrapperItem(GridLayout):
+    index = 0
+    selected = BooleanProperty(False)
+    wrapper = ObjectProperty(None)
+
+    def __init__(self, wrapper, **kwargs):
+        super().__init__(**kwargs)
+        self.wrapper = wrapper
+
+    def deselect(self):
+        self.selected = False
+        self.wrapper.setCollapse(self.index, not self.selected)
+
+    def toggle(self):
+        self.selected = not self.selected
+        self.wrapper.setCollapse(self.index, not self.selected)
+
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            if (self.wrapper.selected_index == -1):
+                self.wrapper.selected_index = self.index
+                self.toggle()
+            elif (self.index != self.wrapper.selected_index):
+                self.wrapper.deselect()
+                self.wrapper.selected_index = self.index
+                self.toggle()
+            elif (self.index == self.wrapper.selected_index):
+                self.wrapper.selected_index = -1
+                self.toggle()
+            print(self.wrapper.selected_index + 1)
+
+class Wrapper(GridLayout):
+    selected_index = -1
+
+    def reverseIndex(self, index):
+        return len(self.children) - index - 1
+
+    def setCollapse(self, index, collapse):
+        self.children[self.reverseIndex(index+1)].setCollapse(collapse)
+    
+    def deselect(self):
+        self.children[self.reverseIndex(self.selected_index)].deselect()
+
+    def insertItem(self, item):
+        if (self.selected_index == -1):
+            return
+        self.children[self.reverseIndex(self.selected_index + 1)].insertItem(item)
+
+    def deleteItem(self):
+        if (self.selected_index == -1):
+            return
+        self.children[self.reverseIndex(self.selected_index + 1)].deleteItem()
+
 class Catalog(RelativeLayout):
     scrollView = ObjectProperty(None)
     scrollBar = ObjectProperty(None)
-    listGrid = ObjectProperty(None)
     newItemInput = ObjectProperty(None)
     newItemSlider = ObjectProperty(None)
     newItemSpinner = ObjectProperty(None)
-
-    items = [
-        ['Odyssey G5', '3999', 'True'],
-        ['UltraGear 27GN750', '4500', 'True'],
-        ['TUF VG259QM', '3299', 'False'],
-        ['Predator XB271HU', '4999', 'True'],
-        ['S2721DGF', '4200', 'True'],
-        ['EX2780Q', '3500', 'False'],
-        ['Optix MAG272C', '2899', 'True'],
-        ['278E1A', '2999', 'False'],
-        ['G32QC', '4500', 'True'],
-        ['VX2758-2KP-MHD', '2800', 'True'],
-        ['Odyssey G7', '4999', 'True'],
-        ['UltraWide 34WN80C', '4000', 'True'],
-        ['ProArt PA278QV', '3500', 'True'],
-        ['Nitro XV272U', '4300', 'False'],
-        ['U2720Q', '4800', 'True'],
-        ['Zowie XL2411P', '2800', 'True'],
-        ['MAG271C', '3300', 'False'],
-        ['Brilliance 276E8VJSB', '2900', 'True'],
-        ['M32Q', '3700', 'False'],
-        ['XG2405', '2600', 'True']
-    ]
+    wrapper = ObjectProperty(None)
+    listGrids = []
 
     itemsExtended = [
         ['Samsung', 'Odyssey G5', '3999', 'True'],
@@ -98,41 +176,44 @@ class Catalog(RelativeLayout):
         price = str(int(self.newItemSlider.value))
         status = self.newItemSpinner.text
         return [name, price, status]
-
+        
     def insertItem(self):
         item = self.getNewItem()
-        selected_index = self.listGrid.reverseIndex(0)
-        if (self.listGrid.selected_index != -1):
-            selected_index = self.listGrid.selected_index
-        self.items.insert(selected_index, item)
-        listItem = ListItem(self.listGrid)
-        for element in item:
-            listItem.add_widget(Label(text=element))
-        self.listGrid.add_widget(listItem, self.listGrid.reverseIndex(selected_index))
-        for i, listItem in enumerate(self.listGrid.children):
-            listItem.index = self.listGrid.reverseIndex(i)
+        self.wrapper.insertItem(item)
 
     def deleteItem(self):
-        selected_index = self.listGrid.reverseIndex(0)
-        if (self.listGrid.selected_index != -1):
-            selected_index = self.listGrid.selected_index
-        
+        self.wrapper.deleteItem()
 
     def on_kv_post(self, base_widget):
+        self.app = App.get_running_app()
         self.scrollView.bind(scroll_y=self.updateSlider)
-        for i, row in enumerate(self.items):
-            listItem = ListItem(self.listGrid)
-            listItem.index = i
-            for item in row:
-                listItem.add_widget(Label(text=item))
-            self.listGrid.add_widget(listItem)
-            
+        
+        itemsDict = {}
+
+        for row in self.itemsExtended:
+            if row[0] in itemsDict:
+                itemsDict[row[0]].append(row[1:])
+            else:
+                itemsDict[row[0]] = [row[1:]]
+
+        for i, category in enumerate(itemsDict):
+            wrapperItem = WrapperItem(self.wrapper)
+            wrapperItem.index = i * 2
+            wrapperItem.add_widget(Label(text=category))
+            self.wrapper.add_widget(wrapperItem)
+            listGrid = ListGrid(itemsDict[category])
+            self.listGrids.append(listGrid)
+            self.wrapper.add_widget(listGrid)
+
+        Clock.schedule_once(self.collapseAllLists, 0)
+
+    def collapseAllLists(self, dt):
+        for listGrid in self.listGrids:
+            listGrid.setCollapse(True)
 
     def updateSlider(self, instance, value):
         self.scrollBar.value = max(0, min(1, value))
-    
-
-    
+ 
 
 class CatalogApp(App):
 
