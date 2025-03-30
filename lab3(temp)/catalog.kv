@@ -43,7 +43,7 @@
     BoxLayout:
         id: mainLayout
         orientation: 'vertical'
-        padding: [200, 100]
+        padding: [200, 60]
         spacing: 10
         BoxLayout:
             id: listHeaderLayout
@@ -143,6 +143,15 @@
             Button:
                 text: 'Set'
                 on_press: root.setItem()
-                
+            
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Button:
+                text: 'Up'
+                on_press: root.moveItem(-1)
+            Button:
+                text: 'Down'
+                on_press: root.moveItem(1)
         
 

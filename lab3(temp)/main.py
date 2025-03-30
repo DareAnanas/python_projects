@@ -102,8 +102,33 @@ class ListGrid(GridLayout):
         if (self.selected_index != -1):
             selected_index = self.selected_index
         listItem = self.children[self.reverseIndex(selected_index)]
-        for i in range(len(listItem.children)):
-            listItem.children[self.reverseIndex(i) + 1].text = item[i]
+        listItem.children[2].text = item[0]
+        listItem.children[1].text = item[1]
+        listItem.children[0].text = item[2]
+
+    def moveItem(self, direction):
+        if (self.selected_index == -1):
+                return
+        if (direction == -1 and self.selected_index == 0):
+                return
+        if (direction == 1 and self.selected_index == len(self.children) - 1):
+                return
+            
+        selected_index = self.selected_index
+
+        currentListItem = self.children[self.reverseIndex(selected_index)]
+        upListItem = self.children[self.reverseIndex(selected_index + direction)]
+
+        currentListItemIndex = self.children[self.reverseIndex(selected_index)].index
+        upListItemIndex = self.children[self.reverseIndex(selected_index + direction)].index
+
+        self.children[self.reverseIndex(selected_index)] = upListItem
+        self.children[self.reverseIndex(selected_index + direction)] = currentListItem
+
+        self.children[self.reverseIndex(selected_index)].index = currentListItemIndex
+        self.children[self.reverseIndex(selected_index + direction)].index = upListItemIndex
+
+        self.selected_index = selected_index + direction
 
     def updateIndices(self):
         for i, listItem in enumerate(self.children):
@@ -172,6 +197,11 @@ class Wrapper(GridLayout):
             return
         self.children[self.reverseIndex(self.selected_index + 1)].setItem(item)
 
+    def moveItem(self, direction):
+        if (self.selected_index == -1):
+            return
+        self.children[self.reverseIndex(self.selected_index + 1)].moveItem(direction)
+
 class Catalog(RelativeLayout):
     scrollView = ObjectProperty(None)
     scrollBar = ObjectProperty(None)
@@ -228,6 +258,9 @@ class Catalog(RelativeLayout):
     def setItem(self):
         item = self.getNewItem()
         self.wrapper.setItem(item)
+
+    def moveItem(self, direction):
+        self.wrapper.moveItem(direction)
 
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
