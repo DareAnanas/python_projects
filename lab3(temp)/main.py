@@ -74,12 +74,36 @@ class ListGrid(GridLayout):
         self.updateIndices()
 
     def deleteItem(self):
+        if (len(self.children) == 0):
+            return
         selected_index = self.reverseIndex(0)
         if (self.selected_index != -1):
             selected_index = self.selected_index
-        print(self.reverseIndex(self.selected_index))
         self.remove_widget(self.children[self.reverseIndex(selected_index)])
         self.updateIndices()
+        self.selected_index = -1
+
+    def getItem(self):
+        if (len(self.children) == 0):
+            return
+        selected_index = self.reverseIndex(0)
+        if (self.selected_index != -1):
+            selected_index = self.selected_index
+        item = []
+        listItem = self.children[self.reverseIndex(selected_index)]
+        for element in reversed(listItem.children):
+            item.append(element.text)
+        return item
+
+    def setItem(self, item):
+        if (len(self.children) == 0):
+            return
+        selected_index = self.reverseIndex(0)
+        if (self.selected_index != -1):
+            selected_index = self.selected_index
+        listItem = self.children[self.reverseIndex(selected_index)]
+        for i in range(len(listItem.children)):
+            listItem.children[self.reverseIndex(i) + 1].text = item[i]
 
     def updateIndices(self):
         for i, listItem in enumerate(self.children):
@@ -115,7 +139,6 @@ class WrapperItem(GridLayout):
             elif (self.index == self.wrapper.selected_index):
                 self.wrapper.selected_index = -1
                 self.toggle()
-            print(self.wrapper.selected_index + 1)
 
 class Wrapper(GridLayout):
     selected_index = -1
@@ -138,6 +161,16 @@ class Wrapper(GridLayout):
         if (self.selected_index == -1):
             return
         self.children[self.reverseIndex(self.selected_index + 1)].deleteItem()
+
+    def getItem(self):
+        if (self.selected_index == -1):
+            return
+        return self.children[self.reverseIndex(self.selected_index + 1)].getItem()
+
+    def setItem(self, item):
+        if (self.selected_index == -1):
+            return
+        self.children[self.reverseIndex(self.selected_index + 1)].setItem(item)
 
 class Catalog(RelativeLayout):
     scrollView = ObjectProperty(None)
@@ -184,6 +217,18 @@ class Catalog(RelativeLayout):
     def deleteItem(self):
         self.wrapper.deleteItem()
 
+    def getItem(self):
+        item = self.wrapper.getItem()
+        if (item == None):
+            return
+        self.newItemInput.text = item[0]
+        self.newItemSlider.value = int(item[1])
+        self.newItemSpinner.text = item[2]
+
+    def setItem(self):
+        item = self.getNewItem()
+        self.wrapper.setItem(item)
+
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
         self.scrollView.bind(scroll_y=self.updateSlider)
@@ -221,7 +266,9 @@ class CatalogApp(App):
     colors = {
         'gray': [0.5, 0.5, 0.5, 1],
         'lightGray': [0.6, 0.6, 0.6, 1],
-        'graySelected': [0.7, 0.7, 0.7, 1]
+        'graySelected': [0.7, 0.7, 0.7, 1],
+        'darkBlue': [0.2471, 0.3137, 0.4235, 1],
+        'blueSelected': [0.4275, 0.5412, 0.7294, 1]
     }
 
     def build(self):

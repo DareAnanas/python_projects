@@ -22,7 +22,7 @@
     height: app.listItemHeight
     canvas.before:
         Color:
-            rgba: app.colors['graySelected'] if self.selected else app.colors['lightGray']
+            rgba: app.colors['blueSelected'] if self.selected else app.colors['darkBlue']
         Rectangle:
             pos: self.pos
             size: self.size
@@ -139,8 +139,10 @@
                 on_press: root.deleteItem()
             Button:
                 text: 'Get'
+                on_press: root.getItem()
             Button:
                 text: 'Set'
+                on_press: root.setItem()
                 
         
 
