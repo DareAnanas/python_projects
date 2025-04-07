@@ -1,0 +1,133 @@
+<SpinBox>:
+    textInput: textInput
+    TextInput:
+        id: textInput
+        size_hint_x: 0.9
+        input_filter: 'int'
+        text: str(root.value)
+        multiline: False
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: 0.1
+        Button:
+            on_press: root.nextElement()
+            Image:
+                source: 'upArrow.png'
+                size: 20, 20
+                center_x: self.parent.center_x
+                center_y: self.parent.center_y
+        Button:
+            on_press: root.prevElement()
+            Image:
+                source: 'downArrow.png'
+                size: 20, 20
+                center_x: self.parent.center_x
+                center_y: self.parent.center_y
+
+<ColorButton>:
+    background_normal: ''
+    background_color: [1, 1, 1, 1]
+
+<Paint>:
+    sideBar: sideBar
+    paintCanvas: paintCanvas
+    BoxLayout:
+        id: mainLayout
+        orientation: 'horizontal'
+        padding: [60, 60]
+        spacing: 10
+        SideBar:
+            id: sideBar
+            size_hint_x: 0.2
+            orientation: 'vertical'
+            objectTypeSpinner: objectTypeSpinner
+            x1: x1
+            y1: y1
+            x2: x2
+            y2: y2
+            colorButton: colorButton
+            arrowSpinner: arrowSpinner
+            arrowShapeSpinner: arrowShapeSpinner
+            labelTextInput: labelTextInput
+            Label:
+                text: 'Choose shape'
+            Spinner:
+                id: objectTypeSpinner
+                text: 'Line'
+                values: ['Line', 'Ellipse', 'Rectangle', 'Arc', 'Label']
+            Label:
+                text: 'First point'
+            SpinBox:
+                id: x1
+                group: 'x'
+                value: 0
+                minValue: 0
+                maxValue: 500
+            SpinBox:
+                id: y1
+                group: 'y'
+                value: 0
+                minValue: 0
+                maxValue: 500
+            Label:
+                text: 'Second point'
+            SpinBox:
+                id: x2
+                group: 'x'
+                value: 0
+                minValue: 0
+                maxValue: 500
+            SpinBox:
+                id: y2
+                group: 'y'
+                value: 0
+                minValue: 0
+                maxValue: 500
+            Label:
+                text: 'Fill color'
+            ColorButton:
+                id: colorButton
+                on_press: self.showColorPicker()
+            Label:
+                text: 'Arrow'
+            Spinner:
+                id: arrowSpinner
+                text: 'None'
+                values: ['None', 'Start', 'End', 'Both']
+            Label:
+                text: 'Arrow Shape'
+            Spinner:
+                id: arrowShapeSpinner
+                text: 'Forward'
+                values: ['Forward', 'Backward']
+            Label:
+                text: 'Label text'
+            TextInput:
+                id: labelTextInput
+            Button:
+                text: 'Draw'
+                background_color: (1, 0.5, 0, 1)
+                on_press: root.draw()
+            Button:
+                text: 'Clear'
+                on_press: root.clear()
+        BoxLayout:
+            id: canvasWrapper
+            size_hint_x: 0.8
+            orientation: 'vertical'
+            Label:
+                size_hint_y: 0.05
+                text: 'Canvas'
+            BoxLayout:
+                id: paintArea
+                size_hint_y: 0.95
+                orientation: 'vertical'
+                PaintCanvas:
+                    id: paintCanvas
+                    sideBar: sideBar
+                    canvas.before:
+                        Color:
+                            rgba: (1, 1, 1, 1)
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
