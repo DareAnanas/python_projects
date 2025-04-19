@@ -52,7 +52,7 @@
             Label:
                 id: sliderValueLabel
                 text: '0'
-                pos: [self.parent.pos[0], self.parent.pos[1] - 20]
+                pos: [self.parent.pos[0], self.parent.pos[1] - 15]
             Slider:
                 id: sizeSlider
                 orientation: 'horizontal'
@@ -85,7 +85,7 @@
             Label:
                 id: sliderValueLabel2
                 text: '0'
-                pos: [self.parent.pos[0], self.parent.pos[1] - 20]
+                pos: [self.parent.pos[0], self.parent.pos[1] - 15]
             Slider:
                 id: wrapOffsetSlider
                 orientation: 'horizontal'
@@ -97,5 +97,10 @@
         
         Button:
             text: 'Ok'
+            on_press: root.applySettings()
+        Button:
+            text: 'Default'
+            on_press: root.setDefaultSettings()
         Button:
             text: 'Cancel'
+            on_press: root.dismiss()

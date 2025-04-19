@@ -15,6 +15,18 @@ class SettingModal(ModalView):
     valignSpinner = ObjectProperty(None)
     wrapOffsetSlider = ObjectProperty(None)
 
+    mainLabel = ObjectProperty(None)
+    anchorLayout = ObjectProperty(None)
+
+    def __init__(self, mainLable, anchorLayout, **kwargs):
+        super().__init__(**kwargs)
+        self.app = App.get_running_app()
+        self.mainLabel = mainLable
+        self.anchorLayout = anchorLayout
+
+    def setDefaultSettings(self):
+        self.setSettings(self.app.defaultSettings)
+
     def setSettings(self, settings):
         self.textInput.text = settings['text']
         self.sizeSlider.max = settings['maxSize']
@@ -25,19 +37,30 @@ class SettingModal(ModalView):
         self.wrapOffsetSlider.max = settings['maxWrapOffset']
         self.wrapOffsetSlider.value = settings['wrapOffset']
 
+    def applySettings(self):
+        self.mainLabel.text = self.textInput.text
+        self.mainLabel.size = (self.sizeSlider.value, self.sizeSlider.value)
+        anchor_y, anchor_x = self.anchorSpinner.text.split(' ')
+        self.anchorLayout.anchor_x = anchor_x.lower()
+        self.anchorLayout.anchor_y = anchor_y.lower()
+        self.mainLabel.halign = self.halignSpinner.text.lower()
+        self.mainLabel.valign = self.valignSpinner.text.lower()
+        self.mainLabel.wrapOffset = self.wrapOffsetSlider.value
+        self.dismiss()
+
 class SettingWidget(RelativeLayout):
     mainLabel = ObjectProperty(None)
     anchorLayout = ObjectProperty(None)
-    anchorSpinner = ObjectProperty(None)
 
     def getLabelSettings(self):
         settings = {
             'text': self.mainLabel.text,
-            'size': self.mainLabel.size,
+            'size': self.mainLabel.width,
             'maxSize': min(self.anchorLayout.width, self.anchorLayout.height),
-            'anchor': (self.anchorLayout.anchor_x, self.anchorLayout.anchor_y),
-            'halign': self.mainLabel.halign,
-            'valign': self.mainLabel.valign,
+            'anchor': str(self.anchorLayout.anchor_y).capitalize() 
+            + ' ' + str(self.anchorLayout.anchor_x).capitalize(),
+            'halign': str(self.mainLabel.halign).capitalize(),
+            'valign': str(self.mainLabel.valign).capitalize(),
             'wrapOffset': self.mainLabel.wrapOffset,
             'maxWrapOffset': self.mainLabel.width - 10
         }
@@ -45,11 +68,23 @@ class SettingWidget(RelativeLayout):
         return settings
 
     def openSettings(self):
-        settingModal = SettingModal()
+        settingModal = SettingModal(self.mainLabel, self.anchorLayout)
         settingModal.setSettings(self.getLabelSettings())
         settingModal.open()
 
 class SettingModalApp(App):
+
+    defaultSettings = {
+        'text': 'Get in tune with the car in my hood',
+        'size': 150,
+        'maxSize': 195,
+        'anchor': 'Center Center',
+        'halign': 'Left',
+        'valign': 'Top',
+        'wrapOffset': 10,
+        'maxWrapOffset': 140
+    }
+
     def build(self):
         return SettingWidget()
 
