@@ -1,0 +1,101 @@
+<SettingWidget>:
+    mainLabel: mainLabel
+    anchorLayout: anchorLayout
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 10
+        AnchorLayout:
+            id: anchorLayout
+            anchor_x: 'center'
+            anchor_y: 'center'
+            WrapLabel:
+                id: mainLabel
+                size_hint: (None, None)
+                text: 'Get in tune with the car in my hood'
+                width: 150
+                text_size: (self.width - self.wrapOffset, self.height)
+                height: 150
+                halign: 'left'
+                valign: 'top'
+                wrapOffset: 10
+                canvas.before:
+                    Color:
+                        rgba: (0.5,0.5,0.5,1)
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+        Button:
+            text: 'Adjust'
+            on_press: root.openSettings()
+
+<SettingModal>:
+    textInput: textInput
+    sizeSlider: sizeSlider
+    anchorSpinner: anchorSpinner
+    halignSpinner: halignSpinner
+    valignSpinner: valignSpinner
+    wrapOffsetSlider: wrapOffsetSlider
+    size_hint: (0.5, 1)
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 20]
+        spacing: 5
+        Label:
+            text: 'Text'
+        TextInput:
+            id: textInput
+            multiline: False
+        Label:
+            text: 'Size(width=height)'
+        FloatLayout:
+            Label:
+                id: sliderValueLabel
+                text: '0'
+                pos: [self.parent.pos[0], self.parent.pos[1] - 20]
+            Slider:
+                id: sizeSlider
+                orientation: 'horizontal'
+                min: 0
+                max: 300
+                value: 0
+                pos: self.parent.pos
+                on_value: sliderValueLabel.text = f"{int(self.value)}"
+        Label:
+            text: 'Anchor'
+        Spinner:
+            id: anchorSpinner
+            text: 'Top Left'
+            values: ('Top Left', 'Top Center', 'Top Right', 'Center Left', 'Center Center', 'Center Right', 'Bottom Left', 'Bottom Center', 'Bottom Right')
+        Label:
+            text: 'Horizontal Align'
+        Spinner:
+            id: halignSpinner
+            text: 'Left'
+            values: ('Left', 'Center', 'Right')
+        Label:
+            text: 'Vertical Align'
+        Spinner:
+            id: valignSpinner
+            text: 'Top'
+            values: ('Top', 'Center', 'Bottom')
+        Label:
+            text: 'Wrap Offset'
+        FloatLayout:
+            Label:
+                id: sliderValueLabel2
+                text: '0'
+                pos: [self.parent.pos[0], self.parent.pos[1] - 20]
+            Slider:
+                id: wrapOffsetSlider
+                orientation: 'horizontal'
+                min: 0
+                max: 300
+                value: 0
+                pos: self.parent.pos
+                on_value: sliderValueLabel2.text = f"{int(self.value)}"
+        
+        Button:
+            text: 'Ok'
+        Button:
+            text: 'Cancel'
