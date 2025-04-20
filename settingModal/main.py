@@ -64,7 +64,6 @@ class SettingWidget(RelativeLayout):
             'wrapOffset': self.mainLabel.wrapOffset,
             'maxWrapOffset': self.mainLabel.width - 10
         }
-        print(settings)
         return settings
 
     def openSettings(self):
