@@ -1,42 +1,44 @@
 <FileManager>:
-    BoxLayout:
-        orientation: 'vertical'
-        FloatLayout:
-            id: layout
-            size_hint_y: 0.1
-            AppMenu:
-                id: app_menu
-                top: root.height
-                cancel_handler_widget: layout
+    fileView: fileView
+    FloatLayout:
+        id: layout
+        FileChooserListView:
+            id: fileView
+            size_hint_y: None
+            height: root.height - 30
+            dirselect: True
+            rootpath: '/home/danylo'
+            path: '/home/danylo'
+            # canvas.before:
+            #     Color: 
+            #         rgba: (0.5, 0.5, 0.5, 1)
+            #     Rectangle:
+            #         pos: self.pos
+            #         size: self.size
+        AppMenu:
+            id: app_menu
+            top: root.height
+            cancel_handler_widget: layout
 
-                AppMenuTextItem:
-                    text: "Menu #1"
-                    ContextMenu:
-                        ContextMenuTextItem:
-                            text: "Item #11"
-                        ContextMenuTextItem:
-                            text: "Item #12"
-                AppMenuTextItem:
-                    text: "Menu Menu Menu #2"
-                    ContextMenu:
-                        ContextMenuTextItem:
-                            text: "Item #21"
-                        ContextMenuTextItem:
-                            text: "Item #22"
-                        ContextMenuTextItem:
-                            text: "Item #24"
-                            ContextMenu:
-                                ContextMenuTextItem:
-                                    text: "Item #241"
-                                ContextMenuTextItem:
-                                    text: "Hello, World!"
-
-        Label:
-            size_hint_y: 0.9
-            canvas.before:
-                Color: 
-                    rgba: (0.5, 0.5, 0.5, 1)
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
+            AppMenuTextItem:
+                text: "Menu #1"
+                ContextMenu:
+                    ContextMenuTextItem:
+                        text: "Item #11"
+                    ContextMenuTextItem:
+                        text: "Item #12"
+            AppMenuTextItem:
+                text: "Menu Menu Menu #2"
+                ContextMenu:
+                    ContextMenuTextItem:
+                        text: "Item #21"
+                    ContextMenuTextItem:
+                        text: "Item #22"
+                    ContextMenuTextItem:
+                        text: "Item #24"
+                        ContextMenu:
+                            ContextMenuTextItem:
+                                text: "Item #241"
+                            ContextMenuTextItem:
+                                text: "Hello, World!"
 
