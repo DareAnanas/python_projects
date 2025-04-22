@@ -1,5 +1,6 @@
 <FileManager>:
     fileView: fileView
+    appMenu: appMenu
     FloatLayout:
         id: layout
         FileChooserListView:
@@ -16,17 +17,23 @@
             #         pos: self.pos
             #         size: self.size
         AppMenu:
-            id: app_menu
+            id: appMenu
             top: root.height
             cancel_handler_widget: layout
 
             AppMenuTextItem:
-                text: "Menu #1"
+                text: "File"
                 ContextMenu:
                     ContextMenuTextItem:
-                        text: "Item #11"
+                        text: "View text file"
+                        on_release: root.sayHello()
                     ContextMenuTextItem:
-                        text: "Item #12"
+                        text: "Rename file"
+                    ContextMenuTextItem:
+                        text: "Delete file"
+                    ContextMenuTextItem:
+                        text: "Create empty file"
+                        
             AppMenuTextItem:
                 text: "Menu Menu Menu #2"
                 ContextMenu:
@@ -42,3 +49,21 @@
                             ContextMenuTextItem:
                                 text: "Hello, World!"
 
+<ViewTextFileModal>:
+    size_hint: (0.9, 0.9)
+    textInput: textInput
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [10, 10]
+        spacing: 5
+        TextInput:
+            id: textInput
+            size_hint_y: 0.9
+        BoxLayout:
+            size_hint_y: 0.1
+            orientation: 'horizontal'
+            spacing: 5
+            Button:
+                text: 'Close'
+            Button:
+                text: 'Save'

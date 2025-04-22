@@ -3,12 +3,19 @@ from kivy.uix.relativelayout import RelativeLayout
 from contextmenu import AppMenu, AppMenuTextItem, \
 ContextMenu, ContextMenuTextItem
 from kivy.properties import ObjectProperty, DictProperty
+from kivy.uix.modalview import ModalView
 import configparser
 import os
 
+class ViewTextFileModal(ModalView):
+    textInput = ObjectProperty(None)
+    
+    def load_file(self):
+        pass
 
 class FileManager(RelativeLayout):
     fileView = ObjectProperty(None)
+    appMenu = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -29,6 +36,14 @@ class FileManager(RelativeLayout):
     def on_path_change(self, fileView, path):
         self.changeSetting('last_path', path)
         self.writeConfig()
+
+    def sayHello(self):
+        if (len(self.fileView.selection) != 0):
+            print(self.fileView.path, self.fileView.selection[0])
+        self.appMenu.close_all()
+        viewTextFileModal = ViewTextFileModal()
+        viewTextFileModal.open()
+
 
 class FileManagerApp(App):
     settings = {}
