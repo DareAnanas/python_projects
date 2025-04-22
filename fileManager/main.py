@@ -4,14 +4,33 @@ from contextmenu import AppMenu, AppMenuTextItem, \
 ContextMenu, ContextMenuTextItem
 from kivy.properties import ObjectProperty, DictProperty
 from kivy.uix.modalview import ModalView
+from kivy.clock import Clock
 import configparser
 import os
 
 class ViewTextFileModal(ModalView):
     textInput = ObjectProperty(None)
     
+    def __init__(self, filepath, **kwargs):
+        super().__init__(**kwargs)
+        self.filepath = filepath
+        self.load_file()
+
+    def on_kv_post(self, bimba):
+        Clock.schedule_once(self.setCursorToStart, 0)
+
     def load_file(self):
-        pass
+        with open(self.filepath, 'r') as stream:
+            self.textInput.text = stream.read()
+
+    def save_file(self):
+        with open(self.filepath, 'w') as stream:
+            stream.write(self.textInput.text)
+        self.dismiss()
+
+    def setCursorToStart(self, delta):
+        self.textInput.cursor = (0, 0)
+        self.textInput.focus = True
 
 class FileManager(RelativeLayout):
     fileView = ObjectProperty(None)
@@ -38,10 +57,11 @@ class FileManager(RelativeLayout):
         self.writeConfig()
 
     def sayHello(self):
-        if (len(self.fileView.selection) != 0):
-            print(self.fileView.path, self.fileView.selection[0])
+        if (len(self.fileView.selection) == 0):
+            return
+        print(self.fileView.path, self.fileView.selection[0])
         self.appMenu.close_all()
-        viewTextFileModal = ViewTextFileModal()
+        viewTextFileModal = ViewTextFileModal(self.fileView.selection[0])
         viewTextFileModal.open()
 
 

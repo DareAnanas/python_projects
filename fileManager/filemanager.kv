@@ -65,5 +65,7 @@
             spacing: 5
             Button:
                 text: 'Close'
+                on_press: root.dismiss()
             Button:
                 text: 'Save'
+                on_release: root.save_file()
