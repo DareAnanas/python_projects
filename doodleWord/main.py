@@ -313,12 +313,14 @@ class DoodleWordGame(Screen):
             print('Розробник попуск')
 
     def bindGameActions(self):
-        self.confirmWordButton.bind(on_press=self.guessWord)
+        self.confirmWordButton.bind(on_release=self.handleInputAction)
         self.backToMenuButton.bind(on_press=self.backToMenu)
+        self.wordInput.bind(on_text_validate=self.handleInputAction)
 
     def unbindGameActions(self):
-        self.confirmWordButton.unbind(on_press=self.guessWord)
+        self.confirmWordButton.unbind(on_release=self.handleInputAction)
         self.backToMenuButton.unbind(on_press=self.backToMenu)
+        self.wordInput.unbind(on_text_validate=self.handleInputAction)
 
     def getRowColors(self):
         rowColors = []
@@ -350,7 +352,11 @@ class DoodleWordGame(Screen):
 
         return rowColors
 
-    def guessWord(self, instance):
+    def handleInputAction(self, instance):
+        self.guessWord()
+        Clock.schedule_once(self.focusWordInput, 0)
+
+    def guessWord(self):
         self.inputWord = self.getInputWord()
         if (len(self.inputWord) != self.app.edition['length']):
             return
@@ -369,11 +375,14 @@ class DoodleWordGame(Screen):
         self.rowIndex += 1
 
         self.wordInput.text = ''
-
+        
         if (self.inputWord == self.randomWord):
             self.gameEnd(state='victory')
         elif (self.rowIndex >= self.app.attempts):
             self.gameEnd(state='defeat')
+
+    def focusWordInput(self, delta):
+        self.wordInput.focus = True
 
     def getInputWord(self):
         return self.wordInput.text.strip().lower()
@@ -410,7 +419,8 @@ class DoodleWordApp(App):
     }
 
     defaultAttempts = 6
-    attempts = defaultAttempts
+    attempts = NumericProperty(defaultAttempts)
+    dynamicPadding = NumericProperty(0)
 
     attemptsNames = [
         [1, '1 спроба'],
@@ -472,6 +482,9 @@ class DoodleWordApp(App):
     def onWindowResize(self, window, size):
         self.fontSize = size[0] * self.FONT_SCALE
 
+    def updatePadding(self, *args):
+        self.dynamicPadding = max(0, 90 - self.attempts*15)
+
     def build(self):
         Window.softinput_mode = 'below_target'
 
@@ -485,6 +498,8 @@ class DoodleWordApp(App):
         screen_width = Window.size[0]
         self.fontSize = screen_width * self.FONT_SCALE
         Window.bind(size=self.onWindowResize)
+
+        self.bind(attempts=self.updatePadding)
 
         return sm
 

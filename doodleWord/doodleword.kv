@@ -215,12 +215,15 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-        GridLayout:
-            id: wordGrid
-            cols: app.edition['length']
-            rows: 6
-            spacing: 5
+        BoxLayout:
+            orientation: 'vertical'
             size_hint_y: 0.7
+            GridLayout:
+                id: wordGrid
+                cols: app.edition['length']
+                rows: 6
+                spacing: 5
+                padding: [0, app.dynamicPadding]
         TextInput:
             id: wordInput
             font_size: app.fontSize / 2
