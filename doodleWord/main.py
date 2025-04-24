@@ -147,7 +147,7 @@ class UserWordModal(ModalView):
         self.infoLabel.color = self.app.theme['text_color']
 
     def isUkrainianWord(self, word):
-        ukrainianLetters = set("абвгґдеєжзиіїйклмнопрстуфхцчшщьюя")
+        ukrainianLetters = set("абвгґдеєжзиіїйклмнопрстуфхцчшщьюя'")
         apostropheCount = 0
 
         for char in word:
@@ -376,7 +376,10 @@ class DoodleWordGame(Screen):
     def guessWord(self):
         self.inputWord = self.getInputWord()
         if (len(self.inputWord) != self.app.edition['length']):
-            self.showHint(f"Слово має мати довжину {self.app.edition['length']} букв")
+            if (self.app.edition['length'] == 4):
+                self.showHint(f"Слово має мати довжину 4 букви")
+            else:
+                self.showHint(f"Слово має мати довжину {self.app.edition['length']} букв")
             return
         if (self.inputWord != self.randomWord and 
             self.inputWord not in self.app.edition['words']):
