@@ -241,6 +241,7 @@ KV = '''
     wordInput: wordInput
     confirmWordButton: confirmWordButton
     backToMenuButton: backToMenuButton
+    hintLabel: hintLabel
     BoxLayout:
         orientation: 'vertical'
         padding: [200, 50]
@@ -251,12 +252,15 @@ KV = '''
             Rectangle:
                 pos: self.pos
                 size: self.size
-        GridLayout:
-            id: wordGrid
-            cols: app.edition['length']
-            rows: 6
-            spacing: 5
+        BoxLayout:
+            orientation: 'vertical'
             size_hint_y: 0.7
+            GridLayout:
+                id: wordGrid
+                cols: app.edition['length']
+                rows: 6
+                spacing: 5
+                padding: [0, app.dynamicPadding]
         TextInput:
             id: wordInput
             font_size: app.fontSize / 2
@@ -282,6 +286,24 @@ KV = '''
             text: 'Повернутися в меню'
             size_hint_y: 0.1
             font_size: app.fontSize / 2
+    FloatLayout:
+        Label:
+            id: hintLabel
+            x: (root.width - self.width) / 2
+            y: (root.height - self.height) / 2
+            size_hint: (None, None)
+            font_size: app.fontSize / 2
+            size: self.texture_size
+            padding: 10
+            color: (1,1,1,1)
+            text: ''
+            opacity: 0
+            canvas.before:
+                Color:
+                    rgba: (0,0,0,1)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 '''
 
 class Base64Image(Image):
@@ -436,7 +458,7 @@ class UserWordModal(ModalView):
         self.infoLabel.color = self.app.theme['text_color']
 
     def isUkrainianWord(self, word):
-        ukrainianLetters = set("абвгґдеєжзиіїйклмнопрстуфхцчшщьюя")
+        ukrainianLetters = set("абвгґдеєжзиіїйклмнопрстуфхцчшщьюя'")
         apostropheCount = 0
 
         for char in word:
@@ -550,12 +572,14 @@ class DoodleWordGame(Screen):
     wordInput = ObjectProperty(None)
     confirmWordButton = ObjectProperty(None)
     backToMenuButton = ObjectProperty(None)
+    hintLabel = ObjectProperty(None)
     randomWord = None
     inputWord = None
     app = None
     wordHistory = []
     gridLabels = []
     rowIndex = 0
+    isHintShown = False
 
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
@@ -602,12 +626,14 @@ class DoodleWordGame(Screen):
             print('Розробник попуск')
 
     def bindGameActions(self):
-        self.confirmWordButton.bind(on_press=self.guessWord)
+        self.confirmWordButton.bind(on_release=self.handleInputAction)
         self.backToMenuButton.bind(on_press=self.backToMenu)
+        self.wordInput.bind(on_text_validate=self.handleInputAction)
 
     def unbindGameActions(self):
-        self.confirmWordButton.unbind(on_press=self.guessWord)
+        self.confirmWordButton.unbind(on_release=self.handleInputAction)
         self.backToMenuButton.unbind(on_press=self.backToMenu)
+        self.wordInput.unbind(on_text_validate=self.handleInputAction)
 
     def getRowColors(self):
         rowColors = []
@@ -639,12 +665,36 @@ class DoodleWordGame(Screen):
 
         return rowColors
 
-    def guessWord(self, instance):
+    def handleInputAction(self, instance):
+        self.guessWord()
+        Clock.schedule_once(self.focusWordInput, 0)
+
+    def showHint(self, message):
+        if (self.isHintShown):
+            return
+        self.isHintShown = True
+        self.hintLabel.text = message
+        self.showHintLabelForTime(1)
+
+    def showHintLabelForTime(self, time):
+        self.hintLabel.opacity = 1
+        Clock.schedule_once(self.hideHintLabel, time)
+
+    def hideHintLabel(self, delta):
+        self.hintLabel.opacity = 0
+        self.isHintShown = False
+
+    def guessWord(self):
         self.inputWord = self.getInputWord()
         if (len(self.inputWord) != self.app.edition['length']):
+            if (self.app.edition['length'] == 4):
+                self.showHint(f"Слово має мати довжину 4 букви")
+            else:
+                self.showHint(f"Слово має мати довжину {self.app.edition['length']} букв")
             return
         if (self.inputWord != self.randomWord and 
             self.inputWord not in self.app.edition['words']):
+            self.showHint(f'Цього слова немає в словнику')
             return
 
         self.wordHistory.append(self.inputWord)
@@ -663,6 +713,9 @@ class DoodleWordGame(Screen):
             self.gameEnd(state='victory')
         elif (self.rowIndex >= self.app.attempts):
             self.gameEnd(state='defeat')
+
+    def focusWordInput(self, delta):
+        self.wordInput.focus = True
 
     def getInputWord(self):
         return self.wordInput.text.strip().lower()
@@ -699,7 +752,8 @@ class DoodleWordApp(App):
     }
 
     defaultAttempts = 6
-    attempts = defaultAttempts
+    attempts = NumericProperty(defaultAttempts)
+    dynamicPadding = NumericProperty(0)
 
     attemptsNames = [
         [1, '1 спроба'],
@@ -761,6 +815,9 @@ class DoodleWordApp(App):
     def onWindowResize(self, window, size):
         self.fontSize = size[0] * self.FONT_SCALE
 
+    def updatePadding(self, *args):
+        self.dynamicPadding = max(0, 90 - self.attempts*15)
+
     def build(self):
         Builder.load_string(KV)
         Window.softinput_mode = 'below_target'
@@ -775,6 +832,7 @@ class DoodleWordApp(App):
         screen_width = Window.size[0]
         self.fontSize = screen_width * self.FONT_SCALE
         Window.bind(size=self.onWindowResize)
+        self.bind(attempts=self.updatePadding)
 
         return sm
 
