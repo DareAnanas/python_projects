@@ -56,11 +56,13 @@ class FileManager(RelativeLayout):
         self.changeSetting('last_path', path)
         self.writeConfig()
 
-    def sayHello(self):
+    def viewTextFile(self):
+        self.appMenu.close_all()
         if (len(self.fileView.selection) == 0):
             return
+        if (os.path.isdir(self.fileView.selection[0])):
+            return
         print(self.fileView.path, self.fileView.selection[0])
-        self.appMenu.close_all()
         viewTextFileModal = ViewTextFileModal(self.fileView.selection[0])
         viewTextFileModal.open()
 
