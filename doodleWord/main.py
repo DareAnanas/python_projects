@@ -261,12 +261,14 @@ class DoodleWordGame(Screen):
     wordInput = ObjectProperty(None)
     confirmWordButton = ObjectProperty(None)
     backToMenuButton = ObjectProperty(None)
+    hintLabel = ObjectProperty(None)
     randomWord = None
     inputWord = None
     app = None
     wordHistory = []
     gridLabels = []
     rowIndex = 0
+    isHintShown = False
 
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
@@ -356,12 +358,29 @@ class DoodleWordGame(Screen):
         self.guessWord()
         Clock.schedule_once(self.focusWordInput, 0)
 
+    def showHint(self, message):
+        if (self.isHintShown):
+            return
+        self.isHintShown = True
+        self.hintLabel.text = message
+        self.showHintLabelForTime(1)
+
+    def showHintLabelForTime(self, time):
+        self.hintLabel.opacity = 1
+        Clock.schedule_once(self.hideHintLabel, time)
+
+    def hideHintLabel(self, delta):
+        self.hintLabel.opacity = 0
+        self.isHintShown = False
+
     def guessWord(self):
         self.inputWord = self.getInputWord()
         if (len(self.inputWord) != self.app.edition['length']):
+            self.showHint(f"Слово має мати довжину {self.app.edition['length']} букв")
             return
         if (self.inputWord != self.randomWord and 
             self.inputWord not in self.app.edition['words']):
+            self.showHint(f'Цього слова немає в словнику')
             return
 
         self.wordHistory.append(self.inputWord)
