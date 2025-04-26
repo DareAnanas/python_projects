@@ -208,7 +208,10 @@ class AbstractMenuItem(object):
 
     def show_submenu(self, x=None, y=None):
         if self.get_submenu():
-            self.get_submenu().show(*self._root_parent.to_local(x, y))
+            if self._root_parent:
+                self.get_submenu().show(*self._root_parent.to_local(x, y))
+            else:
+                print('No valid root parent for submenu. Ignoring right-click.')
 
     def hide_submenu(self):
         submenu = self.get_submenu()

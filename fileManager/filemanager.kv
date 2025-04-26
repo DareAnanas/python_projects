@@ -1,6 +1,7 @@
 <FileManager>:
     fileView: fileView
     appMenu: appMenu
+    contextMenu: contextMenu
     FloatLayout:
         id: layout
         FileChooserListView:
@@ -26,9 +27,10 @@
                 ContextMenu:
                     ContextMenuTextItem:
                         text: "View text file"
-                        on_release: root.viewTextFile()
+                        on_release: root.closeHandler('app', root.viewTextFile)
                     ContextMenuTextItem:
                         text: "Rename file"
+                        on_release: root.closeHandler('app', root.renameFile)
                     ContextMenuTextItem:
                         text: "Delete file"
                     ContextMenuTextItem:
@@ -48,6 +50,48 @@
                                 text: "Item #241"
                             ContextMenuTextItem:
                                 text: "Hello, World!"
+
+        ContextMenu:
+            id: contextMenu
+            visible: False
+            cancel_handler_widget: layout
+
+            ContextMenuTextItem:
+                text: "File"
+                ContextMenu:
+                    ContextMenuTextItem:
+                        text: "View text file"
+                        on_release: root.closeHandler('context', root.viewTextFile)
+                    ContextMenuTextItem:
+                        text: "Rename file"
+                        on_release: root.closeHandler('context', root.renameFile)
+                    ContextMenuTextItem:
+                        text: "Delete file"
+                    ContextMenuTextItem:
+                        text: "Create empty file"
+            ContextMenuTextItem:
+                text: "SubMenu #3"
+                ContextMenu:
+                    ContextMenuTextItem:
+                        text: "SubMenu #5"
+                    ContextMenuTextItem:
+                        text: "SubMenu #6"
+                        ContextMenu:
+                            ContextMenuTextItem:
+                                text: "SubMenu #9"
+                            ContextMenuTextItem:
+                                text: "SubMenu #10"
+                            ContextMenuTextItem:
+                                text: "SubMenu #11"
+                            ContextMenuTextItem:
+                                text: "Hello, World!"
+                                on_release: app.say_hello(self.text)
+                            ContextMenuTextItem:
+                                text: "SubMenu #12"
+                    ContextMenuTextItem:
+                        text: "SubMenu #7"
+            ContextMenuTextItem:
+                text: "SubMenu #4"
 
 <ViewTextFileModal>:
     size_hint: (0.9, 0.9)
@@ -69,3 +113,25 @@
             Button:
                 text: 'Save'
                 on_release: root.save_file()
+
+<NameModal>:
+    size_hint: (0.5, 0.3)
+    nameInput: nameInput
+    actionButton: actionButton
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 5
+        TextInput:
+            id: nameInput
+            size_hint_y: 0.6
+            multiline: False
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 5
+            size_hint_y: 0.4
+            Button:
+                text: 'Cancel'
+                on_press: root.dismiss()
+            Button:
+                id: actionButton

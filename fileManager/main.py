@@ -2,7 +2,7 @@ from kivy.app import App
 from kivy.uix.relativelayout import RelativeLayout
 from contextmenu import AppMenu, AppMenuTextItem, \
 ContextMenu, ContextMenuTextItem
-from kivy.properties import ObjectProperty, DictProperty
+from kivy.properties import ObjectProperty, DictProperty, StringProperty
 from kivy.uix.modalview import ModalView
 from kivy.clock import Clock
 import configparser
@@ -16,7 +16,7 @@ class ViewTextFileModal(ModalView):
         self.filepath = filepath
         self.load_file()
 
-    def on_kv_post(self, bimba):
+    def on_kv_post(self, base_widget):
         Clock.schedule_once(self.setCursorToStart, 0)
 
     def load_file(self):
@@ -32,9 +32,30 @@ class ViewTextFileModal(ModalView):
         self.textInput.cursor = (0, 0)
         self.textInput.focus = True
 
+class NameModal(ModalView):
+    nameInput = ObjectProperty(None)
+    actionButton = ObjectProperty(None)
+
+    def __init__(self, action, fileView, **kwargs):
+        super().__init__(**kwargs)
+        self.fileView = fileView
+        self.filepath = self.fileView.selection[0]
+        if (action == 'rename'):
+            self.actionButton.bind(on_release=self.renameFile)
+            self.actionButton.text = 'Rename'
+            self.nameInput.text = os.path.basename(self.filepath)
+
+    def renameFile(self, *args):
+        fileDir = os.path.dirname(self.filepath)
+        newFileName = self.nameInput.text.strip()
+        os.rename(self.filepath, os.path.join(fileDir, newFileName))
+        self.fileView._trigger_update()
+        self.dismiss()
+
 class FileManager(RelativeLayout):
     fileView = ObjectProperty(None)
     appMenu = ObjectProperty(None)
+    contextMenu = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -56,15 +77,32 @@ class FileManager(RelativeLayout):
         self.changeSetting('last_path', path)
         self.writeConfig()
 
+    def on_touch_up(self, touch):
+        if self.collide_point(*touch.pos) and touch.button == 'right':
+            self.contextMenu.show(*touch.pos)
+
+    def closeHandler(self, menuType, func):
+        if (menuType == 'app'):
+            self.appMenu.close_all()
+        if (menuType == 'context'):
+            self.contextMenu.hide()
+        func()
+
     def viewTextFile(self):
-        self.appMenu.close_all()
         if (len(self.fileView.selection) == 0):
             return
         if (os.path.isdir(self.fileView.selection[0])):
             return
-        print(self.fileView.path, self.fileView.selection[0])
         viewTextFileModal = ViewTextFileModal(self.fileView.selection[0])
         viewTextFileModal.open()
+
+    def renameFile(self):
+        if (len(self.fileView.selection) == 0):
+            return
+        if (os.path.isdir(self.fileView.selection[0])):
+            return
+        renameModal = NameModal('rename', self.fileView)
+        renameModal.open()
 
 
 class FileManagerApp(App):
