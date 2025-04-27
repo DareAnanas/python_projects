@@ -1,12 +1,3 @@
-class Car:
-    weight = 100
+arr = []
 
-
-car1 = Car()
-car2 = Car()
-
-Car.weight = 300
-
-car2.weight = 300
-print(car1.weight)
-print(car2.weight) 
+print(arr[0])

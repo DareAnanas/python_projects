@@ -39,11 +39,14 @@ class NameModal(ModalView):
     def __init__(self, action, fileView, **kwargs):
         super().__init__(**kwargs)
         self.fileView = fileView
-        self.filepath = self.fileView.selection[0]
         if (action == 'rename'):
+            self.filepath = self.fileView.selection[0]
             self.actionButton.bind(on_release=self.renameFile)
             self.actionButton.text = 'Rename'
             self.nameInput.text = os.path.basename(self.filepath)
+        if (action == 'create'):
+            self.actionButton.bind(on_release=self.createFile)
+            self.actionButton.text = 'Create'
 
     def renameFile(self, *args):
         fileDir = os.path.dirname(self.filepath)
@@ -51,6 +54,30 @@ class NameModal(ModalView):
         os.rename(self.filepath, os.path.join(fileDir, newFileName))
         self.fileView._trigger_update()
         self.dismiss()
+
+    def createFile(self, *args):
+        fileName = self.nameInput.text.strip()
+        filePath = os.path.join(self.fileView.path, fileName)
+        if not os.path.exists(filePath):
+            with open(filePath, 'w') as file:
+                pass
+        else:
+            print('File already exists')
+        self.fileView._trigger_update()
+        self.dismiss()
+
+class DeleteFileModal(ModalView):
+    
+    def __init__(self, fileView, **kwargs):
+        super().__init__(**kwargs)
+        self.fileView = fileView
+        self.filepath = self.fileView.selection[0]
+
+    def deleteFile(self):
+        os.remove(self.filepath)
+        self.fileView._trigger_update()
+        self.dismiss()
+
 
 class FileManager(RelativeLayout):
     fileView = ObjectProperty(None)
@@ -104,6 +131,17 @@ class FileManager(RelativeLayout):
         renameModal = NameModal('rename', self.fileView)
         renameModal.open()
 
+    def deleteFile(self):
+        if (len(self.fileView.selection) == 0):
+            return
+        if (os.path.isdir(self.fileView.selection[0])):
+            return
+        deleteFileModal = DeleteFileModal(self.fileView)
+        deleteFileModal.open()
+
+    def createFile(self):
+        createFileModal = NameModal('create', self.fileView)
+        createFileModal.open()
 
 class FileManagerApp(App):
     settings = {}
