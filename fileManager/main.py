@@ -5,15 +5,20 @@ ContextMenu, ContextMenuTextItem
 from kivy.properties import ObjectProperty, DictProperty, StringProperty
 from kivy.uix.modalview import ModalView
 from kivy.clock import Clock
+from kivy.uix.behaviors import ToggleButtonBehavior
 import configparser
 import os
+
+from kivy.uix.togglebutton import ToggleButton
+from kivy.uix.filechooser import FileChooserListView
 
 class ViewTextFileModal(ModalView):
     textInput = ObjectProperty(None)
     
-    def __init__(self, filepath, **kwargs):
+    def __init__(self, fileView, **kwargs):
         super().__init__(**kwargs)
-        self.filepath = filepath
+        self.fileView = fileView
+        self.filepath = self.fileView.selection[0]
         self.load_file()
 
     def on_kv_post(self, base_widget):
@@ -26,6 +31,8 @@ class ViewTextFileModal(ModalView):
     def save_file(self):
         with open(self.filepath, 'w') as stream:
             stream.write(self.textInput.text)
+        self.fileView.selection = []
+        self.fileView._trigger_update()
         self.dismiss()
 
     def setCursorToStart(self, delta):
@@ -78,11 +85,48 @@ class DeleteFileModal(ModalView):
         self.fileView._trigger_update()
         self.dismiss()
 
+def createSortFunc(criteria, order):
+
+    reverse = False
+    if (order == 'z-a'):
+        reverse = True
+
+    def sortByName(files, filesystem):
+        return (sorted((f for f in files if filesystem.is_dir(f)), reverse=reverse) +
+            sorted((f for f in files if not filesystem.is_dir(f)), reverse=reverse))
+
+    def sortByDate(files, filesystem):
+        return (sorted((f for f in files if filesystem.is_dir(f))) +
+            sorted((f for f in files if not filesystem.is_dir(f)), 
+                key=lambda f: os.path.getmtime(f), reverse=reverse))
+
+    def sortByType(files, filesystem):
+        return (sorted((f for f in files if filesystem.is_dir(f))) +
+            sorted((f for f in files if not filesystem.is_dir(f)), 
+                key=lambda f: os.path.splitext(os.path.basename(f))[1], reverse=reverse))
+
+    def sortBySize(files, filesystem):
+        return (sorted((f for f in files if filesystem.is_dir(f))) +
+            sorted((f for f in files if not filesystem.is_dir(f)),
+                key=lambda f: filesystem.getsize(f), reverse=reverse))
+
+    if (criteria == 'name'):
+        return sortByName
+    if (criteria == 'date'):
+        return sortByDate
+    if (criteria == 'type'):
+        return sortByType
+    if (criteria == 'size'):
+        return sortBySize
+    
+    return sortByName
+
 
 class FileManager(RelativeLayout):
     fileView = ObjectProperty(None)
     appMenu = ObjectProperty(None)
     contextMenu = ObjectProperty(None)
+    sortFilesMenu = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -120,7 +164,7 @@ class FileManager(RelativeLayout):
             return
         if (os.path.isdir(self.fileView.selection[0])):
             return
-        viewTextFileModal = ViewTextFileModal(self.fileView.selection[0])
+        viewTextFileModal = ViewTextFileModal(self.fileView)
         viewTextFileModal.open()
 
     def renameFile(self):
@@ -142,6 +186,24 @@ class FileManager(RelativeLayout):
     def createFile(self):
         createFileModal = NameModal('create', self.fileView)
         createFileModal.open()
+
+    def getSortCriteria(self):
+        for toggleButton in ToggleButtonBehavior.get_widgets('criteria'):
+            if toggleButton.state == 'down':
+                return toggleButton.text.lower()
+        return 'name'
+
+    def getSortOrder(self):
+        for toggleButton in ToggleButtonBehavior.get_widgets('order'):
+            if toggleButton.state == 'down':
+                return toggleButton.text.lower()
+        return 'a-z'
+
+    def sortFiles(self):
+        criteria = self.getSortCriteria()
+        order = self.getSortOrder()
+        self.fileView.sort_func = createSortFunc(criteria, order)
+        self.fileView._trigger_update()
 
 class FileManagerApp(App):
     settings = {}

@@ -2,6 +2,7 @@
     fileView: fileView
     appMenu: appMenu
     contextMenu: contextMenu
+    sortFilesMenu: sortFilesMenu
     FloatLayout:
         id: layout
         FileChooserListView:
@@ -42,16 +43,43 @@
                 text: "View"
                 ContextMenu:
                     ContextMenuTextItem:
-                        text: "Sort files by"
+                        text: "Sort files"
                         ContextMenu:
+                            id: sortFilesMenu
+                            ContextMenuDivider:
+                                text: 'Criteria'
                             ContextMenuTextItem:
-                                text: "name"
+                                ToggleButton:
+                                    group: 'criteria'
+                                    text: 'Name'
+                                    on_release: root.closeHandler('app', root.sortFiles)
                             ContextMenuTextItem:
-                                text: "date"
+                                ToggleButton:
+                                    group: 'criteria'
+                                    text: 'Date'
+                                    on_release: root.closeHandler('app', root.sortFiles)
                             ContextMenuTextItem:
-                                text: "type"
+                                ToggleButton:
+                                    group: 'criteria'
+                                    text: 'Type'
+                                    on_release: root.closeHandler('app', root.sortFiles)
                             ContextMenuTextItem:
-                                text: "size"
+                                ToggleButton:
+                                    group: 'criteria'
+                                    text: 'Size'
+                                    on_release: root.closeHandler('app', root.sortFiles)
+                            ContextMenuDivider:
+                                text: 'Order'
+                            ContextMenuTextItem:
+                                ToggleButton:
+                                    group: 'order'
+                                    text: 'A-Z'
+                                    on_release: root.closeHandler('app', root.sortFiles)
+                            ContextMenuTextItem:
+                                ToggleButton:
+                                    group: 'order'
+                                    text: 'Z-A'
+                                    on_release: root.closeHandler('app', root.sortFiles)
 
         ContextMenu:
             id: contextMenu

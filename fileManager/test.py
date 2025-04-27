@@ -1,3 +1,5 @@
-arr = []
+arr = ['.py', '.vim', '.txt']
 
-print(arr[0])
+arr = sorted((f for f in arr ), key=lambda f: f, reverse=True)
+
+print(arr)
