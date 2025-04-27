@@ -58,6 +58,10 @@ class NameModal(ModalView):
     def renameFile(self, *args):
         fileDir = os.path.dirname(self.filepath)
         newFileName = self.nameInput.text.strip()
+        if (newFileName == ''):
+            print('Empty file name')
+            self.dismiss()
+            return
         os.rename(self.filepath, os.path.join(fileDir, newFileName))
         self.fileView._trigger_update()
         self.dismiss()
@@ -85,48 +89,13 @@ class DeleteFileModal(ModalView):
         self.fileView._trigger_update()
         self.dismiss()
 
-def createSortFunc(criteria, order):
 
-    reverse = False
-    if (order == 'z-a'):
-        reverse = True
-
-    def sortByName(files, filesystem):
-        return (sorted((f for f in files if filesystem.is_dir(f)), reverse=reverse) +
-            sorted((f for f in files if not filesystem.is_dir(f)), reverse=reverse))
-
-    def sortByDate(files, filesystem):
-        return (sorted((f for f in files if filesystem.is_dir(f))) +
-            sorted((f for f in files if not filesystem.is_dir(f)), 
-                key=lambda f: os.path.getmtime(f), reverse=reverse))
-
-    def sortByType(files, filesystem):
-        return (sorted((f for f in files if filesystem.is_dir(f))) +
-            sorted((f for f in files if not filesystem.is_dir(f)), 
-                key=lambda f: os.path.splitext(os.path.basename(f))[1], reverse=reverse))
-
-    def sortBySize(files, filesystem):
-        return (sorted((f for f in files if filesystem.is_dir(f))) +
-            sorted((f for f in files if not filesystem.is_dir(f)),
-                key=lambda f: filesystem.getsize(f), reverse=reverse))
-
-    if (criteria == 'name'):
-        return sortByName
-    if (criteria == 'date'):
-        return sortByDate
-    if (criteria == 'type'):
-        return sortByType
-    if (criteria == 'size'):
-        return sortBySize
-    
-    return sortByName
 
 
 class FileManager(RelativeLayout):
     fileView = ObjectProperty(None)
     appMenu = ObjectProperty(None)
     contextMenu = ObjectProperty(None)
-    sortFilesMenu = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -187,6 +156,42 @@ class FileManager(RelativeLayout):
         createFileModal = NameModal('create', self.fileView)
         createFileModal.open()
 
+    def createSortFunc(self, criteria, order):
+
+        reverse = False
+        if (order == 'z-a'):
+            reverse = True
+
+        def sortByName(files, filesystem):
+            return (sorted((f for f in files if filesystem.is_dir(f)), reverse=reverse) +
+                sorted((f for f in files if not filesystem.is_dir(f)), reverse=reverse))
+
+        def sortByDate(files, filesystem):
+            return (sorted((f for f in files if filesystem.is_dir(f))) +
+                sorted((f for f in files if not filesystem.is_dir(f)), 
+                    key=lambda f: os.path.getmtime(f), reverse=reverse))
+
+        def sortByType(files, filesystem):
+            return (sorted((f for f in files if filesystem.is_dir(f))) +
+                sorted((f for f in files if not filesystem.is_dir(f)), 
+                    key=lambda f: os.path.splitext(os.path.basename(f))[1], reverse=reverse))
+
+        def sortBySize(files, filesystem):
+            return (sorted((f for f in files if filesystem.is_dir(f))) +
+                sorted((f for f in files if not filesystem.is_dir(f)),
+                    key=lambda f: filesystem.getsize(f), reverse=reverse))
+
+        if (criteria == 'name'):
+            return sortByName
+        if (criteria == 'date'):
+            return sortByDate
+        if (criteria == 'type'):
+            return sortByType
+        if (criteria == 'size'):
+            return sortBySize
+        
+        return sortByName
+
     def getSortCriteria(self):
         for toggleButton in ToggleButtonBehavior.get_widgets('criteria'):
             if toggleButton.state == 'down':
@@ -202,7 +207,7 @@ class FileManager(RelativeLayout):
     def sortFiles(self):
         criteria = self.getSortCriteria()
         order = self.getSortOrder()
-        self.fileView.sort_func = createSortFunc(criteria, order)
+        self.fileView.sort_func = self.createSortFunc(criteria, order)
         self.fileView._trigger_update()
 
 class FileManagerApp(App):
