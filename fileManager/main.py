@@ -208,6 +208,7 @@ class FileManager(RelativeLayout):
         criteria = self.getSortCriteria()
         order = self.getSortOrder()
         self.fileView.sort_func = self.createSortFunc(criteria, order)
+        self.fileView.selection = []
         self.fileView._trigger_update()
 
 class FileManagerApp(App):
