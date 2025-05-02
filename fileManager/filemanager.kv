@@ -11,12 +11,6 @@
             dirselect: True
             rootpath: '/home/danylo'
             path: app.settings['last_path']
-            # canvas.before:
-            #     Color: 
-            #         rgba: (0.5, 0.5, 0.5, 1)
-            #     Rectangle:
-            #         pos: self.pos
-            #         size: self.size
         AppMenu:
             id: appMenu
             top: root.height
@@ -78,7 +72,18 @@
                                     group: 'order'
                                     text: 'Z-A'
                                     on_release: root.closeHandler('app', root.sortFiles)
-
+            AppMenuTextItem:
+                text: "Dir"
+                ContextMenu:
+                    ContextMenuTextItem:
+                        text: "Go to parent dir"
+                        on_release: root.closeHandler('app', root.goToParentDir)
+                    ContextMenuTextItem:
+                        text: "Go to home dir"
+                        on_release: root.closeHandler('app', root.goToHomeDir)
+                    ContextMenuTextItem:
+                        text: "Create new folder"
+                        on_release: root.closeHandler('app', root.createDir)
         ContextMenu:
             id: contextMenu
             visible: False
@@ -140,7 +145,16 @@
                                     text: 'Z-A'
                                     on_release: root.closeHandler('context', root.sortFiles)
             ContextMenuTextItem:
-                text: "SubMenu #4"
+                text: "Dir"
+                ContextMenu:
+                    ContextMenuTextItem:
+                        text: "Go to parent dir"
+                        on_release: root.closeHandler('context', root.goToParentDir)
+                    ContextMenuTextItem:
+                        text: "Go to home dir"
+                        on_release: root.closeHandler('context', root.goToHomeDir)
+                    ContextMenuTextItem:
+                        text: "Create new folder"
 
 <ViewTextFileModal>:
     size_hint: (0.9, 0.9)

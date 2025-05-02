@@ -54,6 +54,9 @@ class NameModal(ModalView):
         if (action == 'create'):
             self.actionButton.bind(on_release=self.createFile)
             self.actionButton.text = 'Create'
+        if (action == 'createDir'):
+            self.actionButton.bind(on_release=self.createDir)
+            self.actionButton.text = 'Create'
 
     def renameFile(self, *args):
         fileDir = os.path.dirname(self.filepath)
@@ -74,6 +77,16 @@ class NameModal(ModalView):
                 pass
         else:
             print('File already exists')
+        self.fileView._trigger_update()
+        self.dismiss()
+
+    def createDir(self, *args):
+        dirName = self.nameInput.text.strip()
+        dirPath = os.path.join(self.fileView.path, dirName)
+        if (not os.path.exists(dirPath)):
+            os.mkdir(dirPath)
+        else:
+            print('Directory already exists')
         self.fileView._trigger_update()
         self.dismiss()
 
@@ -210,6 +223,17 @@ class FileManager(RelativeLayout):
         self.fileView.sort_func = self.createSortFunc(criteria, order)
         self.fileView.selection = []
         self.fileView._trigger_update()
+
+    def goToParentDir(self):
+        parentDir = os.path.dirname(self.fileView.path)
+        self.fileView.path = parentDir
+
+    def goToHomeDir(self):
+        self.fileView.path = self.fileView.rootpath
+
+    def createDir(self):
+        createDirModal = NameModal('createDir', self.fileView)
+        createDirModal.open()
 
 class FileManagerApp(App):
     settings = {}
