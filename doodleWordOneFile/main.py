@@ -307,13 +307,12 @@ KV = '''
 '''
 
 class Base64Image(Image):
-    image_name = StringProperty('')  # Початкове зображення
+    image_name = StringProperty('')
 
     def on_kv_post(self, base_widget):
         self.update_texture(imageDict[self.image_name])
 
     def on_image_name(self, instance, value):
-        """Оновлює текстуру при зміні `source`."""
         if value in imageDict:
             self.update_texture(imageDict[value])
         else:
@@ -326,7 +325,6 @@ class Base64Image(Image):
 
 class ColorConverter:
     def hexToRgba(hex_color, alpha=1):
-        # Convert a hex color string to an RGBA tuple (0-1 range).
         hex_color = hex_color.lstrip("#")
         r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
         return [round(r / 255.0, 4), round(g / 255.0, 4), round(b / 255.0, 4), alpha]
