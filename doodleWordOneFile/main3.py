@@ -399,17 +399,18 @@ class DoodleWordMenu(Screen):
     def go_to_settings(self):
         self.manager.current = 'settings'
 
-  
+# Віджет для вибору режиму гри (довжини слова)
 class WordLengthSpinBox(BoxLayout):
-    app = None
-    index = NumericProperty(1)
-    items = ListProperty([])
+    app = None  # Посилання на додаток
+    index = NumericProperty(1)  # Поточний індекс у списку items
+    items = ListProperty([])  # Список доступних варіантів довжини слів
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.app = App.get_running_app()
-        self.items = self.app.editions_names
+        self.items = self.app.editions_names  # Завантажуємо назви режимів гри
 
+    # Переходимо до наступного елемента списку, якщо можливо
     def next_element(self):
         if self.index + 1 >= len(self.items):
             return
@@ -418,6 +419,7 @@ class WordLengthSpinBox(BoxLayout):
         self.app.root.get_screen('settings').changed_session_settings = True
         self.app.clear_user_word()
 
+    # Переходимо до попереднього елемента списку, якщо можливо
     def prev_element(self):
         if self.index <= 0:
             return
@@ -427,16 +429,18 @@ class WordLengthSpinBox(BoxLayout):
         self.app.clear_user_word()
 
 
+# Віджет для вибору складності гри (кількості спроб)
 class AttemptsSpinBox(BoxLayout):
-    app = None
-    index = NumericProperty(5)
-    items = ListProperty([])
+    app = None  # Посилання на додаток
+    index = NumericProperty(5)  # Поточний індекс у списку items
+    items = ListProperty([])  # Список можливих складностей
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.app = App.get_running_app()
-        self.items = self.app.attempts_names
+        self.items = self.app.attempts_names  # Завантажуємо доступні варіанти складностей
 
+    # Переходимо до наступної складності
     def next_element(self):
         if self.index + 1 >= len(self.items):
             return
@@ -444,6 +448,7 @@ class AttemptsSpinBox(BoxLayout):
         self.app.attempts = self.items[self.index][0]
         self.app.root.get_screen('settings').changed_session_settings = True
 
+    # Переходимо до попередньої складності
     def prev_element(self):
         if self.index <= 0:
             return
@@ -451,45 +456,47 @@ class AttemptsSpinBox(BoxLayout):
         self.app.attempts = self.items[self.index][0]
         self.app.root.get_screen('settings').changed_session_settings = True
 
-
+# Модальне вікно для введення слова користувачем
 class UserWordModal(ModalView):
-    title = StringProperty('Загадай слово')
-    word_input = ObjectProperty(None)
-    info_label = ObjectProperty(None)
+    title = StringProperty('Загадай слово')  # Заголовок вікна
+    word_input = ObjectProperty(None)  # Поле вводу слова
+    info_label = ObjectProperty(None)  # Мітка для відображення інформації
 
+    # Отримуємо екземпляр запущеного додатку
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
 
+    # Тимчасово змінюємо колір info_label
     def set_info_label_color_for_time(self, color, time):
         self.info_label.color = color
         Clock.schedule_once(self.revert_hint_label_color, time)
 
+    # Повертаємо колір мітки до стандартного
     def revert_hint_label_color(self, dt):
         self.info_label.color = self.app.theme['text_color']
 
+    # Перевіряємо, чи слово містить тільки українські букви
     def is_ukrainian_word(self, word):
         ukrainian_letters = set("абвгґдеєжзиіїйклмнопрстуфхцчшщьюя'")
-        apostrophe_count = 0
-
         for char in word:
             if char not in ukrainian_letters:
                 return False
-
         return True
 
+    # Перевіряємо, чи в слові більше одного апострофа
     def has_too_many_apostrophes(self, word):
         apostrophe_count = 0
-
         for char in word:
             if char == "'":
                 apostrophe_count += 1
                 if apostrophe_count > 1:
                     return True
-        
         return False
 
+    # Перевіряємо введене користувачем слово і, якщо воно правильне, встановлюємо його
     def write_user_word(self):
         if len(self.word_input.text) != self.app.edition['length']:
+            # Невірна довжина слова
             if self.app.edition['length'] == 4:
                 self.title = "Слово має мати 4 букви"
             else:
@@ -500,18 +507,22 @@ class UserWordModal(ModalView):
         input_word = self.word_input.text.lower()
 
         if self.has_too_many_apostrophes(input_word):
+            # Забагато апострофів у слові
             self.title = "Слово містить забагато апострофів"
             self.set_info_label_color_for_time(self.app.theme['defeat_color'], 0.5)
             return
 
         if not self.is_ukrainian_word(input_word):
+            # Слово містить неукраїнські символи
             self.title = "Слово містить не українські символи"
             self.set_info_label_color_for_time(self.app.theme['defeat_color'], 0.5)
             return
 
+        # Встановлюємо користувацьке слово
         self.app.set_user_word(input_word)
         self.app.root.get_screen('settings').changed_session_settings = True
 
+        # Закриваємо модальне вікно
         self.dismiss()
 
 
