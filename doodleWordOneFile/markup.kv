@@ -102,12 +102,12 @@
                 size: self.size
         ThemedButton:
             text: 'Перезапустити гру'
-            on_press: root.restartGameButtonAction()
+            on_press: root.restart_game_button_action()
         FloatLayout:
             ThemedButton:
                 pos: self.parent.pos
                 text: 'Загадати слово'
-                on_press: root.openUserWordModal()
+                on_press: root.open_user_word_modal()
             Label:
                 right: self.parent.right
                 top: self.parent.top
@@ -115,101 +115,101 @@
                 size: [20, 20]
                 canvas.before:
                     Color:
-                        rgba: app.theme['changed_color'] if app.userWordSetted else [0,0,0,0]
+                        rgba: app.theme['changed_color'] if app.user_word_setted else [0,0,0,0]
                     Ellipse:
                         pos: self.pos
                         size: self.size
                 
         WordLengthSpinBox:
-            id: wordLengthSpinBox
+            id: word_length_spin_box
             Button:
                 size_hint_x: 0.2
                 background_color: app.theme['button_bg']
                 background_normal: ''
-                on_press: self.parent.prevElement()
-                Image:
-                    source: app.theme['left_arrow_image']
+                on_press: self.parent.prev_element()
+                Base64Image:
+                    image_name: app.theme['left_arrow_image']
                     size: 25, 25
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y
             Label:
                 size_hint_x: 0.6
-                font_size: app.fontSize
+                font_size: app.font_size
                 color: app.theme['text_color']
                 text: self.parent.items[self.parent.index][1]
             Button:
                 size_hint_x: 0.2
                 background_color: app.theme['button_bg']
                 background_normal: ''
-                on_press: self.parent.nextElement()
-                Image:
-                    source: app.theme['right_arrow_image']
+                on_press: self.parent.next_element()
+                Base64Image:
+                    image_name: app.theme['right_arrow_image']
                     size: 25, 25
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y      
         AttemptsSpinBox:
-            id: attemptsSpinBox
+            id: attempts_spin_box
             Button:
                 size_hint_x: 0.2
                 background_color: app.theme['button_bg']
                 background_normal: ''
-                on_press: self.parent.prevElement()
-                Image:
-                    source: app.theme['left_arrow_image']
+                on_press: self.parent.prev_element()
+                Base64Image:
+                    image_name: app.theme['left_arrow_image']
                     size: 25, 25
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y
             Label:
                 size_hint_x: 0.6
-                font_size: app.fontSize
+                font_size: app.font_size
                 color: app.theme['text_color']
                 text: self.parent.items[self.parent.index][1]
             Button:
                 size_hint_x: 0.2
                 background_color: app.theme['button_bg']
                 background_normal: ''
-                on_press: self.parent.nextElement()
-                Image:
-                    source: app.theme['right_arrow_image']
+                on_press: self.parent.next_element()
+                Base64Image:
+                    image_name: app.theme['right_arrow_image']
                     size: 25, 25
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y
         ThemedButton:
             text: 'Змінити тему'
-            on_press: root.switchTheme()
+            on_press: root.switch_theme()
         ThemedButton:
             text: 'Назад'
-            on_press: root.backToMenu()
+            on_press: root.back_to_menu()
 
 <GameEndModal>:
     size_hint: 0.5, 0.5
     auto_dismiss: False
     background: ''
     background_color: app.theme['bg_color']
-    restartButton: restartButton
+    restart_button: restart_button
     BoxLayout:
         orientation: 'vertical'
         padding: [20, 10]
         spacing: 5
         Label:
             text: root.title
-            font_size: app.fontSize
+            font_size: app.font_size
             color: root.color
         Label:
-            text: 'Правильне слово: ' + app.root.get_screen('game').randomWord
+            text: 'Правильне слово: ' + app.root.get_screen('game').random_word
             color: app.theme['text_color']
-            font_size: app.fontSize / 2
+            font_size: app.font_size / 2
         ThemedButton:
-            id: restartButton
+            id: restart_button
             text: 'Грати знову'
-            font_size: app.fontSize / 2
+            font_size: app.font_size / 2
 
 <DoodleWordGame>:
-    wordGrid: wordGrid
-    wordInput: wordInput
-    confirmWordButton: confirmWordButton
-    backToMenuButton: backToMenuButton
-    hintLabel: hintLabel
+    word_grid: word_grid
+    word_input: word_input
+    confirm_word_button: confirm_word_button
+    back_to_menu_button: back_to_menu_button
+    hint_label: hint_label
     BoxLayout:
         orientation: 'vertical'
         padding: [200, 50]
@@ -224,14 +224,14 @@
             orientation: 'vertical'
             size_hint_y: 0.7
             GridLayout:
-                id: wordGrid
+                id: word_grid
                 cols: app.edition['length']
                 rows: 6
                 spacing: 5
-                padding: [0, app.dynamicPadding]
+                padding: [0, app.dynamic_padding]
         TextInput:
-            id: wordInput
-            font_size: app.fontSize / 2
+            id: word_input
+            font_size: app.font_size / 2
             size_hint_y: 0.1
             background_color: app.theme['input_bg']
             foreground_color: app.theme['text_color']
@@ -245,22 +245,22 @@
                     width: 2
                     rectangle: self.x, self.y, self.width, self.height
         ThemedButton:
-            id: confirmWordButton
+            id: confirm_word_button
             text: 'Вгадати слово'
             size_hint_y: 0.1
-            font_size: app.fontSize / 2
+            font_size: app.font_size / 2
         ThemedButton:
-            id: backToMenuButton
+            id: back_to_menu_button
             text: 'Повернутися в меню'
             size_hint_y: 0.1
-            font_size: app.fontSize / 2
+            font_size: app.font_size / 2
     FloatLayout:
         Label:
-            id: hintLabel
+            id: hint_label
             x: (root.width - self.width) / 2
             y: (root.height - self.height) / 2
             size_hint: (None, None)
-            font_size: app.fontSize / 2
+            font_size: app.font_size / 2
             size: self.texture_size
             padding: 10
             color: (1,1,1,1)
@@ -272,4 +272,3 @@
                 Rectangle:
                     pos: self.pos
                     size: self.size
-
