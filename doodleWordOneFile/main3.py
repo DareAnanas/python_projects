@@ -516,16 +516,21 @@ class UserWordModal(ModalView):
 
 
 class DoodleWordSettings(Screen):
+    # Прапор для відстеження змін, які потрібно зберегти в config.ini
     changed_settings = False
+    # Прапор для відстеження змін, які стосуються тільки поточної сесії (без збереження)
     changed_session_settings = False
 
+    # Отримуємо екземпляр запущеного додатку
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
 
+    # Змінюємо налаштування додатку
     def change_setting(self, key, value):
         self.app.settings[key] = value
         self.changed_settings = True
 
+    # Перемикаємо тему між світлою і темною
     def switch_theme(self):
         if self.app.theme == ThemeManager.light_theme:
             self.app.theme = ThemeManager.dark_theme
@@ -534,6 +539,7 @@ class DoodleWordSettings(Screen):
             self.app.theme = ThemeManager.light_theme
             self.change_setting('theme', 'light')
 
+    # Записуємо налаштування в файл config.ini
     def write_config(self):
         config = configparser.ConfigParser()
         config['Settings'] = self.app.settings
@@ -542,38 +548,47 @@ class DoodleWordSettings(Screen):
         with open(config_path, 'w') as file:
             config.write(file)
 
+    # Відкриваємо модальне вікно для введення користувацького слова
     def open_user_word_modal(self):
         user_word_modal = UserWordModal()
         user_word_modal.open()
 
+    # Обробник кнопки перезапуску гри на екрані налаштувань
     def restart_game_button_action(self):
         self.changed_session_settings = False
         self.app.clear_user_word()
         self.restart_game()
 
+    # Перезапускаємо гру
     def restart_game(self):
         self.app.root.get_screen('game').game_restart()
 
+    # Повертаємося до головного меню
     def back_to_menu(self):
         if self.changed_session_settings:
+            # Якщо були змінені сесійні налаштування, перезапускаємо гру
             self.changed_session_settings = False
             self.restart_game()
         if self.changed_settings:
+            # Якщо були змінені налаштування додатку, записуємо їх у файл
             self.write_config()
         self.manager.current = 'menu'
 
 
+# Модальне вікно, що показується після завершення гри (перемога або поразка)
 class GameEndModal(ModalView):
-    title = StringProperty('')
-    color = ColorProperty([1, 1, 1, 1])
-    restart_button = ObjectProperty(None)
+    title = StringProperty('')  # Текст заголовку модального вікна
+    color = ColorProperty([1, 1, 1, 1])  # Колір заголовку
+    restart_button = ObjectProperty(None)  # Кнопка перезапуску гри
 
     def __init__(self, title='', color=[1, 1, 1, 1], **kwargs):
         super().__init__(**kwargs)
         self.title = title
         self.color = color
+        # Прив'язуємо кнопку перезапуску до функції перезапуску гри
         self.restart_button.bind(on_press=self.restart_game)
 
+    # Перезапускаємо гру після закриття модального вікна
     def restart_game(self, instance):
         self.dismiss()
         App.get_running_app().root.get_screen('game').game_restart()
