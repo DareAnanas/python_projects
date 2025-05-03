@@ -1,0 +1,275 @@
+# Оголошення власного віджета ThemedButton, який наслідується від Button
+<ThemedButton@Button>:
+    font_size: app.fontSize  # Розмір шрифту береться з налаштувань додатку
+    color: app.theme['text_color']  # Колір тексту залежить від поточної теми
+    background_color: app.theme['button_bg']  # Колір фону кнопки залежить від теми
+    background_normal: ''  # Забираємо стандартний бекграунд картинки кнопки
+
+# Оголошення власного віджета ThemedLabel, який наслідується від Label
+<ThemedLabel>:
+    font_size: app.fontSize / 2  # Менший розмір шрифту для підписів
+    color: app.theme['text_color']  # Колір тексту залежить від теми
+    canvas.before:  # Промальовка фону перед текстом
+        Color:
+            rgba: self.bg_color  # Колір фону залежить від властивості bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size    
+
+# Розмітка головного меню
+<DoodleWordMenu>:
+    BoxLayout:
+        orientation: 'vertical'  # Розташування елементів вертикально
+        padding: [200, 100]  # Відступи від країв контейнера
+        spacing: 30  # Відстань між елементами
+        canvas.before:  # Промальовка фону перед усіма елементами
+            Color:
+                rgba: app.theme['bg_color']  # Колір фону з теми
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Image:
+            source: app.theme['logo_image']  # Зміна логотипу залежно від теми
+            fit_mode: 'contain'  # Логотип масштабується, щоб повністю поміститись у віджет
+        Label:
+            text: "Doodle Word"  # Назва гри
+            font_size: app.fontSize  # Розмір шрифту для заголовка
+            color: app.theme['text_color']  # Колір тексту з теми
+        ThemedButton:
+            text: "Почати гру"  # Кнопка для старту гри
+            on_press: root.manager.current = 'game'  # При натисканні переходимо на екран 'game'
+        ThemedButton:
+            text: 'Налаштування'  # Кнопка для переходу до налаштувань
+            on_press: root.goToSettings()
+        ThemedButton:
+            text: 'Вийти з гри'  # Кнопка для виходу з додатку
+            on_press: app.stop()
+
+
+<UserWordModal>:
+    size_hint: 0.5, 0.5
+    auto_dismiss: False
+    background: ''
+    background_color: app.theme['bg_color']
+    wordInput: wordInput
+    infoLabel: infoLabel
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 10]
+        spacing: 20
+        Label:
+            id: infoLabel
+            text: root.title
+            font_size: app.fontSize / 2
+            color: app.theme['text_color']
+        TextInput:
+            id: wordInput
+            font_size: app.fontSize / 2
+            background_color: app.theme['input_bg']
+            foreground_color: app.theme['text_color']
+            cursor_color: app.theme['text_color']
+            background_normal: ''
+            multiline: False
+            canvas.before:
+                Color:
+                    rgba: app.theme['stroke_color']
+                Line:
+                    width: 2
+                    rectangle: self.x, self.y, self.width, self.height
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 5
+            ThemedButton:
+                text: 'Скасувати'
+                font_size: app.fontSize / 2
+                on_press: root.dismiss()
+            ThemedButton:
+                text: 'Загадати'
+                font_size: app.fontSize / 2
+                on_press: root.writeUserWord()
+
+<DoodleWordSettings>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 50]
+        spacing: 30
+        canvas.before:
+            Color:
+                rgba: app.theme['bg_color']
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        ThemedButton:
+            text: 'Перезапустити гру'
+            on_press: root.restartGameButtonAction()
+        FloatLayout:
+            ThemedButton:
+                pos: self.parent.pos
+                text: 'Загадати слово'
+                on_press: root.openUserWordModal()
+            Label:
+                right: self.parent.right
+                top: self.parent.top
+                # pos: [self.parent.right - 20, self.parent.top - 20]
+                size_hint: [None, None]
+                size: [20, 20]
+                canvas.before:
+                    Color:
+                        rgba: app.theme['changed_color'] if app.userWordSetted else [0,0,0,0]
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+                
+        WordLengthSpinBox:
+            id: wordLengthSpinBox
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.prevElement()
+                Image:
+                    source: app.theme['left_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+            Label:
+                size_hint_x: 0.6
+                font_size: app.fontSize
+                color: app.theme['text_color']
+                text: self.parent.items[self.parent.index][1]
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.nextElement()
+                Image:
+                    source: app.theme['right_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y      
+        AttemptsSpinBox:
+            id: attemptsSpinBox
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.prevElement()
+                Image:
+                    source: app.theme['left_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+            Label:
+                size_hint_x: 0.6
+                font_size: app.fontSize
+                color: app.theme['text_color']
+                text: self.parent.items[self.parent.index][1]
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.nextElement()
+                Image:
+                    source: app.theme['right_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+        ThemedButton:
+            text: 'Змінити тему'
+            on_press: root.switchTheme()
+        ThemedButton:
+            text: 'Назад'
+            on_press: root.backToMenu()
+
+<GameEndModal>:
+    size_hint: 0.5, 0.5
+    auto_dismiss: False
+    background: ''
+    background_color: app.theme['bg_color']
+    restartButton: restartButton
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 10]
+        spacing: 5
+        Label:
+            text: root.title
+            font_size: app.fontSize
+            color: root.color
+        Label:
+            text: 'Правильне слово: ' + app.root.get_screen('game').randomWord
+            color: app.theme['text_color']
+            font_size: app.fontSize / 2
+        ThemedButton:
+            id: restartButton
+            text: 'Грати знову'
+            font_size: app.fontSize / 2
+
+<DoodleWordGame>:
+    wordGrid: wordGrid
+    wordInput: wordInput
+    confirmWordButton: confirmWordButton
+    backToMenuButton: backToMenuButton
+    hintLabel: hintLabel
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 50]
+        spacing: 20
+        canvas.before:
+            Color:
+                rgba: app.theme['bg_color']
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.7
+            GridLayout:
+                id: wordGrid
+                cols: app.edition['length']
+                rows: 6
+                spacing: 5
+                padding: [0, app.dynamicPadding]
+        TextInput:
+            id: wordInput
+            font_size: app.fontSize / 2
+            size_hint_y: 0.1
+            background_color: app.theme['input_bg']
+            foreground_color: app.theme['text_color']
+            cursor_color: app.theme['text_color']
+            background_normal: ''
+            multiline: False
+            canvas.before:
+                Color:
+                    rgba: app.theme['stroke_color']
+                Line:
+                    width: 2
+                    rectangle: self.x, self.y, self.width, self.height
+        ThemedButton:
+            id: confirmWordButton
+            text: 'Вгадати слово'
+            size_hint_y: 0.1
+            font_size: app.fontSize / 2
+        ThemedButton:
+            id: backToMenuButton
+            text: 'Повернутися в меню'
+            size_hint_y: 0.1
+            font_size: app.fontSize / 2
+    FloatLayout:
+        Label:
+            id: hintLabel
+            x: (root.width - self.width) / 2
+            y: (root.height - self.height) / 2
+            size_hint: (None, None)
+            font_size: app.fontSize / 2
+            size: self.texture_size
+            padding: 10
+            color: (1,1,1,1)
+            text: ''
+            opacity: 0
+            canvas.before:
+                Color:
+                    rgba: (0,0,0,1)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
