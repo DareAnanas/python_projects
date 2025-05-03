@@ -580,35 +580,41 @@ class GameEndModal(ModalView):
 
 
 class DoodleWordGame(Screen):
+    # Об'єкти інтерфейсу
     word_grid = ObjectProperty(None)
     word_input = ObjectProperty(None)
     confirm_word_button = ObjectProperty(None)
     back_to_menu_button = ObjectProperty(None)
     hint_label = ObjectProperty(None)
-    random_word = None
-    input_word = None
-    app = None
-    word_history = []
-    grid_labels = []
-    row_index = 0
-    is_hint_shown = False
 
+    # Логіка гри
+    random_word = None  # Слово, яке потрібно вгадати
+    input_word = None   # Слово, яке ввів користувач
+    app = None          # Посилання на головний застосунок
+    word_history = []   # Історія введених слів
+    grid_labels = []    # Всі мітки (букви) на сітці
+    row_index = 0       # Номер поточного рядка
+    is_hint_shown = False  # Чи показується підказка зараз
+
+    # Викликається після завантаження kv-розмітки
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
         self.bind_game_actions()
         self.game_start()
 
+    # Запуск гри: генеруємо слово і готуємо сітку
     def game_start(self):
         self.random_word = self.app.get_random_word()
         self.word_grid.cols = self.app.edition['length']
         self.word_grid.rows = self.app.attempts
-        for i in range(self.app.edition['length']*self.app.attempts):
+        for i in range(self.app.edition['length'] * self.app.attempts):
             themed_label = ThemedLabel()
             self.grid_labels.append(themed_label)
             self.word_grid.add_widget(themed_label)
         
-        print(self.random_word)
+        print(self.random_word)  # Для дебагу
 
+    # Перезапуск гри: очищення сітки та запуск гри
     def game_restart(self):
         self.grid_labels.clear()
         self.word_grid.clear_widgets()
@@ -616,15 +622,15 @@ class DoodleWordGame(Screen):
         self.word_history.clear()
 
         self.bind_game_actions()
-
         self.game_start()
 
+    # Завершення гри: перемога або поразка
     def game_end(self, state):
         self.unbind_game_actions()
 
         if state == 'victory':
             game_end_modal = GameEndModal(
-                title='Ти переміг!', 
+                title='Ти переміг!',
                 color=self.app.theme['victory_color']
             )
             game_end_modal.open()
@@ -635,30 +641,36 @@ class DoodleWordGame(Screen):
             )
             game_end_modal.open()
         else:
-            print('Розробник попуск')
+            print('Розробник попуск')  # Невідомий стан (жарт)
 
+    # Прив'язка кнопок і вводу до методів обробки
     def bind_game_actions(self):
         self.confirm_word_button.bind(on_release=self.handle_input_action)
         self.back_to_menu_button.bind(on_press=self.back_to_menu)
         self.word_input.bind(on_text_validate=self.handle_input_action)
 
+    # Відв'язка кнопок і вводу
     def unbind_game_actions(self):
         self.confirm_word_button.unbind(on_release=self.handle_input_action)
         self.back_to_menu_button.unbind(on_press=self.back_to_menu)
         self.word_input.unbind(on_text_validate=self.handle_input_action)
 
+    # Визначення кольорів міток у рядку
     def get_row_colors(self):
+        # правильні букви, частково правильні, неправильні
         row_colors = []
 
         for i in range(self.app.edition['length']):
             row_colors.append(self.app.theme['incorrect_color'])
 
+        # Спочатку виставляємо правильні позиції
         for i in range(self.app.edition['length']):
             if self.input_word[i] == self.random_word[i]:
                 row_colors[i] = self.app.theme['correct_color']
 
         partly_correct_memory = []
 
+        # Потім шукаємо частково правильні
         for i in range(self.app.edition['length']):
             if row_colors[i] == self.app.theme['incorrect_color']:
                 is_partly_correct_color = False
@@ -677,10 +689,13 @@ class DoodleWordGame(Screen):
 
         return row_colors
 
+    # Обробка введення слова на Desktop
     def handle_input_action(self, instance):
         self.guess_word()
+        # Для Android цю стрічку треба прибрати
         Clock.schedule_once(self.focus_word_input, 0)
 
+    # Показати підказку користувачу
     def show_hint(self, message):
         if self.is_hint_shown:
             return
@@ -688,22 +703,27 @@ class DoodleWordGame(Screen):
         self.hint_label.text = message
         self.show_hint_label_for_time(1)
 
+    # Показати підказку на певний час
     def show_hint_label_for_time(self, time):
         self.hint_label.opacity = 1
         Clock.schedule_once(self.hide_hint_label, time)
 
+    # Сховати підказку після закінчення часу
     def hide_hint_label(self, delta):
         self.hint_label.opacity = 0
         self.is_hint_shown = False
 
+    # Основна логіка перевірки введеного слова
     def guess_word(self):
         self.input_word = self.get_input_word()
+
         if len(self.input_word) != self.app.edition['length']:
             if self.app.edition['length'] == 4:
                 self.show_hint(f"Слово має мати довжину 4 букви")
             else:
                 self.show_hint(f"Слово має мати довжину {self.app.edition['length']} букв")
             return
+
         if (self.input_word != self.random_word and 
             self.input_word not in self.app.edition['words']):
             self.show_hint(f'Цього слова немає в словнику')
@@ -711,27 +731,33 @@ class DoodleWordGame(Screen):
 
         self.word_history.append(self.input_word)
 
+        # Заповнення сітки буквами
         for i, letter in enumerate(self.input_word):
             self.grid_labels[self.row_index * self.app.edition['length'] + i].text = letter.upper()
 
+        # Присвоєння кольорів для букв
         for i, color in enumerate(self.get_row_colors()):
             self.grid_labels[self.row_index * self.app.edition['length'] + i].bg_color = color
         
         self.row_index += 1
 
-        self.word_input.text = ''
+        self.word_input.text = ''  # Очистити поле вводу
 
+        # Перевірка завершення гри
         if self.input_word == self.random_word:
             self.game_end(state='victory')
         elif self.row_index >= self.app.attempts:
             self.game_end(state='defeat')
 
+    # Повернути фокус на поле вводу слова
     def focus_word_input(self, delta):
         self.word_input.focus = True
 
+    # Отримати слово з поля вводу, прибравши пробіли
     def get_input_word(self):
         return self.word_input.text.strip().lower()
-
+    
+    # Повернутись у головне меню
     def back_to_menu(self, instance):
         self.manager.current = 'menu'
 
