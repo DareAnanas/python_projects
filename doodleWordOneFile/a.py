@@ -1,0 +1,821 @@
+from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager, Screen, SwapTransition
+from kivy.uix.label import Label
+from kivy.uix.modalview import ModalView
+from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import DictProperty, NumericProperty, \
+ObjectProperty, ListProperty, StringProperty, ColorProperty, BooleanProperty
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.clock import Clock
+from kivy.uix.image import Image
+from kivy.core.image import Image as CoreImage
+from io import BytesIO
+import random
+import configparser
+import os
+import base64
+
+KV = '''
+<ThemedButton@Button>:
+    font_size: app.fontSize
+    color: app.theme['text_color']
+    background_color: app.theme['button_bg']
+    background_normal: ''
+
+<ThemedLabel>:
+    font_size: app.fontSize / 2
+    color: app.theme['text_color']
+    canvas.before:
+        Color:
+            rgba: self.bg_color
+        Rectangle:
+            pos: self.pos
+            size: self.size    
+
+<DoodleWordMenu>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 100]
+        spacing: 30
+        canvas.before:
+            Color:
+                rgba: app.theme['bg_color']
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Base64Image:
+            image_name: app.theme['logo_image']
+            fit_mode: 'contain'
+        Label:
+            text: "Doodle Word"
+            font_size: app.fontSize
+            color: app.theme['text_color']
+        ThemedButton:
+            text: "Почати гру"
+            on_press: root.manager.current = 'game'
+        ThemedButton:
+            text: 'Налаштування'
+            on_press: root.goToSettings()
+        ThemedButton:
+            text: 'Вийти з гри'
+            on_press: app.stop()
+
+<UserWordModal>:
+    size_hint: 0.5, 0.5
+    auto_dismiss: False
+    background: ''
+    background_color: app.theme['bg_color']
+    wordInput: wordInput
+    infoLabel: infoLabel
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 10]
+        spacing: 20
+        Label:
+            id: infoLabel
+            text: root.title
+            font_size: app.fontSize / 2
+            color: app.theme['text_color']
+        TextInput:
+            id: wordInput
+            font_size: app.fontSize / 2
+            background_color: app.theme['input_bg']
+            foreground_color: app.theme['text_color']
+            cursor_color: app.theme['text_color']
+            background_normal: ''
+            multiline: False
+            canvas.before:
+                Color:
+                    rgba: app.theme['stroke_color']
+                Line:
+                    width: 2
+                    rectangle: self.x, self.y, self.width, self.height
+        BoxLayout:
+            orientation: 'horizontal'
+            spacing: 5
+            ThemedButton:
+                text: 'Скасувати'
+                font_size: app.fontSize / 2
+                on_press: root.dismiss()
+            ThemedButton:
+                text: 'Загадати'
+                font_size: app.fontSize / 2
+                on_press: root.writeUserWord()
+
+<DoodleWordSettings>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 50]
+        spacing: 30
+        canvas.before:
+            Color:
+                rgba: app.theme['bg_color']
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        ThemedButton:
+            text: 'Перезапустити гру'
+            on_press: root.restartGameButtonAction()
+        FloatLayout:
+            ThemedButton:
+                pos: self.parent.pos
+                text: 'Загадати слово'
+                on_press: root.openUserWordModal()
+            Label:
+                right: self.parent.right
+                top: self.parent.top
+                # pos: [self.parent.right - 20, self.parent.top - 20]
+                size_hint: [None, None]
+                size: [20, 20]
+                canvas.before:
+                    Color:
+                        rgba: app.theme['changed_color'] if app.userWordSetted else [0,0,0,0]
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+                
+        WordLengthSpinBox:
+            id: wordLengthSpinBox
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.prevElement()
+                Base64Image:
+                    image_name: app.theme['left_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+            Label:
+                size_hint_x: 0.6
+                font_size: app.fontSize
+                color: app.theme['text_color']
+                text: self.parent.items[self.parent.index][1]
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.nextElement()
+                Base64Image:
+                    image_name: app.theme['right_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y      
+        AttemptsSpinBox:
+            id: attemptsSpinBox
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.prevElement()
+                Base64Image:
+                    image_name: app.theme['left_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+            Label:
+                size_hint_x: 0.6
+                font_size: app.fontSize
+                color: app.theme['text_color']
+                text: self.parent.items[self.parent.index][1]
+            Button:
+                size_hint_x: 0.2
+                background_color: app.theme['button_bg']
+                background_normal: ''
+                on_press: self.parent.nextElement()
+                Base64Image:
+                    image_name: app.theme['right_arrow_image']
+                    size: 25, 25
+                    center_x: self.parent.center_x
+                    center_y: self.parent.center_y
+        ThemedButton:
+            text: 'Змінити тему'
+            on_press: root.switchTheme()
+        ThemedButton:
+            text: 'Назад'
+            on_press: root.backToMenu()
+
+<GameEndModal>:
+    size_hint: 0.5, 0.5
+    auto_dismiss: False
+    background: ''
+    background_color: app.theme['bg_color']
+    restartButton: restartButton
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [20, 10]
+        spacing: 5
+        Label:
+            text: root.title
+            font_size: app.fontSize
+            color: root.color
+        Label:
+            text: 'Правильне слово: ' + app.root.get_screen('game').randomWord
+            color: app.theme['text_color']
+            font_size: app.fontSize / 2
+        ThemedButton:
+            id: restartButton
+            text: 'Грати знову'
+            font_size: app.fontSize / 2
+
+<DoodleWordGame>:
+    wordGrid: wordGrid
+    wordInput: wordInput
+    confirmWordButton: confirmWordButton
+    backToMenuButton: backToMenuButton
+    hintLabel: hintLabel
+    BoxLayout:
+        orientation: 'vertical'
+        padding: [200, 50]
+        spacing: 20
+        canvas.before:
+            Color:
+                rgba: app.theme['bg_color']
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.7
+            GridLayout:
+                id: wordGrid
+                cols: app.edition['length']
+                rows: 6
+                spacing: 5
+                padding: [0, app.dynamicPadding]
+        TextInput:
+            id: wordInput
+            font_size: app.fontSize / 2
+            size_hint_y: 0.1
+            background_color: app.theme['input_bg']
+            foreground_color: app.theme['text_color']
+            cursor_color: app.theme['text_color']
+            background_normal: ''
+            multiline: False
+            canvas.before:
+                Color:
+                    rgba: app.theme['stroke_color']
+                Line:
+                    width: 2
+                    rectangle: self.x, self.y, self.width, self.height
+        ThemedButton:
+            id: confirmWordButton
+            text: 'Вгадати слово'
+            size_hint_y: 0.1
+            font_size: app.fontSize / 2
+        ThemedButton:
+            id: backToMenuButton
+            text: 'Повернутися в меню'
+            size_hint_y: 0.1
+            font_size: app.fontSize / 2
+    FloatLayout:
+        Label:
+            id: hintLabel
+            x: (root.width - self.width) / 2
+            y: (root.height - self.height) / 2
+            size_hint: (None, None)
+            font_size: app.fontSize / 2
+            size: self.texture_size
+            padding: 10
+            color: (1,1,1,1)
+            text: ''
+            opacity: 0
+            canvas.before:
+                Color:
+                    rgba: (0,0,0,1)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+'''
+
+class Base64Image(Image):
+    image_name = StringProperty('')
+
+    def on_kv_post(self, base_widget):
+        self.update_texture(imageDict[self.image_name])
+
+    def on_image_name(self, instance, value):
+        if value in imageDict:
+            self.update_texture(imageDict[value])
+        else:
+            print(f"Зображення '{value}' не знайдено!")
+
+    def update_texture(self, encoded_image):
+        decoded = base64.b64decode(encoded_image)
+        buffer = BytesIO(decoded)
+        self.texture = CoreImage(buffer, ext="png").texture
+
+class ColorConverter:
+    def hexToRgba(hex_color, alpha=1):
+        hex_color = hex_color.lstrip("#")
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        return [round(r / 255.0, 4), round(g / 255.0, 4), round(b / 255.0, 4), alpha]
+
+    hexRgbaDict = {
+        '#FCFCFC': [252, 252, 252, 1],
+        '#1E1E1E': [30, 30, 30, 1],
+        '#EC9D75': [236, 157, 117, 1],
+        '#C16565': [193, 101, 101, 1]
+    }
+
+class ThemeManager:
+    light_theme = {
+        'bg_color': ColorConverter.hexToRgba('#FCFCFC'),
+        'text_color': ColorConverter.hexToRgba('#1E1E1E'),
+        'button_bg': ColorConverter.hexToRgba('#EC9D75'),
+        'input_bg': ColorConverter.hexToRgba('#FCFCFC'),
+        'stroke_color': ColorConverter.hexToRgba('#1E1E1E'),
+        'logo_image': 'logo_light',
+        'correct_color': ColorConverter.hexToRgba('#00C300'),
+        'partly_correct_color': ColorConverter.hexToRgba('#D4EF07'),
+        'incorrect_color': ColorConverter.hexToRgba('#B1B1B1'),
+        'victory_color': ColorConverter.hexToRgba('#00C300'),
+        'defeat_color': ColorConverter.hexToRgba('#FF0000'),
+        'left_arrow_image': 'left_arrow_light',
+        'right_arrow_image': 'right_arrow_light',
+        'changed_color': ColorConverter.hexToRgba('#C16565')
+    }
+    dark_theme = {
+        'bg_color': ColorConverter.hexToRgba('#1E1E1E'),
+        'text_color': ColorConverter.hexToRgba('#FCFCFC'),
+        'button_bg': ColorConverter.hexToRgba('#C16565'),
+        'input_bg': ColorConverter.hexToRgba('#C16565'),
+        'stroke_color': ColorConverter.hexToRgba('#FCFCFC'),
+        'logo_image': 'logo_dark',
+        'correct_color': ColorConverter.hexToRgba('#008000'),
+        'partly_correct_color': ColorConverter.hexToRgba('#A1B907'),
+        'incorrect_color': ColorConverter.hexToRgba('#808080'),
+        'victory_color': ColorConverter.hexToRgba('#008000'),
+        'defeat_color': ColorConverter.hexToRgba('#FF0000'),
+        'left_arrow_image': 'left_arrow_dark',
+        'right_arrow_image': 'right_arrow_dark',
+        'changed_color': ColorConverter.hexToRgba('#EC9D75')
+    }
+
+class ThemedLabel(Label):
+    bg_color = ListProperty([1, 1, 1, 1])
+
+    def __init__(self, **kwargs):
+        self.app = App.get_running_app()
+        super().__init__(**kwargs)
+        self.bg_color = self.app.theme['button_bg']
+        self.app.bind(theme=self.updateTheme)
+
+    def updateTheme(self, instance, value):
+        self.bg_color = value['button_bg']
+
+class DoodleWordMenu(Screen):
+
+    def on_kv_post(self, base_widget):
+        self.app = App.get_running_app()
+
+    def goToSettings(self):
+        self.manager.current = 'settings'
+    
+class WordLengthSpinBox(BoxLayout):
+    app = None
+    index = NumericProperty(1)
+    items = ListProperty([])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.app = App.get_running_app()
+        self.items = self.app.editionsNames
+
+    def nextElement(self):
+        if (self.index + 1 >= len(self.items)):
+            return
+        self.index += 1
+        self.app.setEdition(self.items[self.index][0])
+        self.app.root.get_screen('settings').changedSessionSettings = True
+        self.app.clearUserWord()
+
+    def prevElement(self):
+        if (self.index <= 0):
+            return
+        self.index -= 1
+        self.app.setEdition(self.items[self.index][0])
+        self.app.root.get_screen('settings').changedSessionSettings = True
+        self.app.clearUserWord()
+
+class AttemptsSpinBox(BoxLayout):
+    app = None
+    index = NumericProperty(5)
+    items = ListProperty([])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.app = App.get_running_app()
+        self.items = self.app.attemptsNames
+
+    def nextElement(self):
+        if (self.index + 1 >= len(self.items)):
+            return
+        self.index += 1
+        self.app.attempts = self.items[self.index][0]
+        self.app.root.get_screen('settings').changedSessionSettings = True
+
+    def prevElement(self):
+        if (self.index <= 0):
+            return
+        self.index -= 1
+        self.app.attempts = self.items[self.index][0]
+        self.app.root.get_screen('settings').changedSessionSettings = True
+
+class UserWordModal(ModalView):
+    title = StringProperty('Загадай слово')
+    wordInput = ObjectProperty(None)
+    infoLabel = ObjectProperty(None)
+
+    def on_kv_post(self, base_widget):
+        self.app = App.get_running_app()
+
+    def setInfoLabelColorForTime(self, color, time):
+        self.infoLabel.color = color
+        Clock.schedule_once(self.revertHintLabelColor, time)
+
+    def revertHintLabelColor(self, dt):
+        self.infoLabel.color = self.app.theme['text_color']
+
+    def isUkrainianWord(self, word):
+        ukrainianLetters = set("абвгґдеєжзиіїйклмнопрстуфхцчшщьюя'")
+        apostropheCount = 0
+
+        for char in word:
+            if (char not in ukrainianLetters):
+                return False
+
+        return True
+
+    def hasTooManyApostrophes(self, word):
+        apostropheCount = 0
+
+        for char in word:
+            if (char == "'"):
+                apostropheCount += 1
+                if (apostropheCount > 1):
+                    return True
+        
+        return False
+
+    def writeUserWord(self):
+        if (len(self.wordInput.text) != self.app.edition['length']):
+            if (self.app.edition['length'] == 4):
+                self.title = "Слово має мати 4 букви"
+            else:
+                self.title = f"Слово має мати {self.app.edition['length']} букв"
+            self.setInfoLabelColorForTime(self.app.theme['defeat_color'], 0.5)
+            return
+
+        inputWord = self.wordInput.text.lower()
+
+        if (self.hasTooManyApostrophes(inputWord)):
+            self.title = "Слово містить забагато апострофів"
+            self.setInfoLabelColorForTime(self.app.theme['defeat_color'], 0.5)
+            return
+
+        if (not self.isUkrainianWord(inputWord)):
+            self.title = "Слово містить не українські символи"
+            self.setInfoLabelColorForTime(self.app.theme['defeat_color'], 0.5)
+            return
+
+        self.app.setUserWord(inputWord)
+        self.app.root.get_screen('settings').changedSessionSettings = True
+
+        self.dismiss()
+
+class DoodleWordSettings(Screen):
+    changedSettings = False
+    changedSessionSettings = False
+
+    def on_kv_post(self, base_widget):
+        self.app = App.get_running_app()
+
+    def changeSetting(self, key, value):
+        self.app.settings[key] = value
+        self.changedSettings = True
+
+    def switchTheme(self):
+        if (self.app.theme == ThemeManager.light_theme):
+            self.app.theme = ThemeManager.dark_theme
+            self.changeSetting('theme', 'dark')
+        elif (self.app.theme == ThemeManager.dark_theme):
+            self.app.theme = ThemeManager.light_theme
+            self.changeSetting('theme', 'light')
+
+    def writeConfig(self):
+        config = configparser.ConfigParser()
+        config['Settings'] = self.app.settings
+        thisFileDir = os.path.dirname(os.path.abspath(__file__))
+        configPath = os.path.join(thisFileDir, 'config.ini')
+        with open(configPath, 'w') as file:
+            config.write(file)
+
+    def openUserWordModal(self):
+        userWordModal = UserWordModal()
+        userWordModal.open()
+
+    def restartGameButtonAction(self):
+        self.changedSessionSettings = False
+        self.app.clearUserWord()
+        self.restartGame()
+
+    def restartGame(self):
+        self.app.root.get_screen('game').gameRestart()
+
+    def backToMenu(self):
+        if (self.changedSessionSettings):
+            self.changedSessionSettings = False
+            self.restartGame()
+        if (self.changedSettings):
+            self.writeConfig()
+        self.manager.current = 'menu'
+
+class GameEndModal(ModalView):
+    title = StringProperty('')
+    color = ColorProperty([1, 1, 1, 1])
+    restartButton = ObjectProperty(None)
+
+    def __init__(self, title='', color=[1, 1, 1, 1], **kwargs):
+        super().__init__(**kwargs)
+        self.title = title
+        self.color = color
+        self.restartButton.bind(on_press=self.restartGame)
+
+    def restartGame(self, instance):
+        self.dismiss()
+        App.get_running_app().root.get_screen('game').gameRestart()
+
+class DoodleWordGame(Screen):
+    
+    wordGrid = ObjectProperty(None)
+    wordInput = ObjectProperty(None)
+    confirmWordButton = ObjectProperty(None)
+    backToMenuButton = ObjectProperty(None)
+    hintLabel = ObjectProperty(None)
+    randomWord = None
+    inputWord = None
+    app = None
+    wordHistory = []
+    gridLabels = []
+    rowIndex = 0
+    isHintShown = False
+
+    def on_kv_post(self, base_widget):
+        self.app = App.get_running_app()
+        self.bindGameActions()
+        self.gameStart()
+
+    def gameStart(self):
+        self.randomWord = self.app.getRandomWord()
+        self.wordGrid.cols = self.app.edition['length']
+        self.wordGrid.rows = self.app.attempts
+        for i in range(self.app.edition['length']*self.app.attempts):
+            themedLabel = ThemedLabel()
+            self.gridLabels.append(themedLabel)
+            self.wordGrid.add_widget(themedLabel)
+        
+        print(self.randomWord)
+
+    def gameRestart(self):
+        self.gridLabels.clear()
+        self.wordGrid.clear_widgets()
+        self.rowIndex = 0
+        self.wordHistory.clear()
+
+        self.bindGameActions()
+
+        self.gameStart()
+
+    def gameEnd(self, state):
+        self.unbindGameActions()
+
+        if (state == 'victory'):
+            gameEndModal = GameEndModal(
+                title='Ти переміг!', 
+                color=self.app.theme['victory_color']
+            )
+            gameEndModal.open()
+        elif (state == 'defeat'):
+            gameEndModal = GameEndModal(
+                title='Ти програв!',
+                color=self.app.theme['defeat_color']
+            )
+            gameEndModal.open()
+        else:
+            print('Розробник попуск')
+
+    def bindGameActions(self):
+        self.confirmWordButton.bind(on_release=self.handleInputAction)
+        self.backToMenuButton.bind(on_press=self.backToMenu)
+        self.wordInput.bind(on_text_validate=self.handleInputAction)
+
+    def unbindGameActions(self):
+        self.confirmWordButton.unbind(on_release=self.handleInputAction)
+        self.backToMenuButton.unbind(on_press=self.backToMenu)
+        self.wordInput.unbind(on_text_validate=self.handleInputAction)
+
+    def getRowColors(self):
+        rowColors = []
+
+        for i in range(self.app.edition['length']):
+            rowColors.append(self.app.theme['incorrect_color'])
+
+        for i in range(self.app.edition['length']):
+            if (self.inputWord[i] == self.randomWord[i]):
+                rowColors[i] = self.app.theme['correct_color']
+
+        partlyCorrectMemory = []
+
+        for i in range(self.app.edition['length']):
+            if (rowColors[i] == self.app.theme['incorrect_color']):
+                isPartlyCorrectColor = False
+                for j in range(self.app.edition['length']):
+                    if (isPartlyCorrectColor):
+                        continue
+                    if (rowColors[j] == self.app.theme['correct_color']):
+                        continue
+                    if (j in partlyCorrectMemory):
+                        continue
+                    if (self.inputWord[i] == self.randomWord[j]):
+                        partlyCorrectMemory.append(j)
+                        isPartlyCorrectColor = True
+                if (isPartlyCorrectColor):
+                    rowColors[i] = self.app.theme['partly_correct_color']
+
+        return rowColors
+
+    def handleInputAction(self, instance):
+        self.guessWord()
+        Clock.schedule_once(self.focusWordInput, 0)
+
+    def showHint(self, message):
+        if (self.isHintShown):
+            return
+        self.isHintShown = True
+        self.hintLabel.text = message
+        self.showHintLabelForTime(1)
+
+    def showHintLabelForTime(self, time):
+        self.hintLabel.opacity = 1
+        Clock.schedule_once(self.hideHintLabel, time)
+
+    def hideHintLabel(self, delta):
+        self.hintLabel.opacity = 0
+        self.isHintShown = False
+
+    def guessWord(self):
+        self.inputWord = self.getInputWord()
+        if (len(self.inputWord) != self.app.edition['length']):
+            if (self.app.edition['length'] == 4):
+                self.showHint(f"Слово має мати довжину 4 букви")
+            else:
+                self.showHint(f"Слово має мати довжину {self.app.edition['length']} букв")
+            return
+        if (self.inputWord != self.randomWord and 
+            self.inputWord not in self.app.edition['words']):
+            self.showHint(f'Цього слова немає в словнику')
+            return
+
+        self.wordHistory.append(self.inputWord)
+
+        for i, letter in enumerate(self.inputWord):
+            self.gridLabels[self.rowIndex * self.app.edition['length'] + i].text = letter.upper()
+
+        for i, color in enumerate(self.getRowColors()):
+            self.gridLabels[self.rowIndex * self.app.edition['length'] + i].bg_color = color
+        
+        self.rowIndex += 1
+
+        self.wordInput.text = ''
+
+        if (self.inputWord == self.randomWord):
+            self.gameEnd(state='victory')
+        elif (self.rowIndex >= self.app.attempts):
+            self.gameEnd(state='defeat')
+
+    def focusWordInput(self, delta):
+        self.wordInput.focus = True
+
+    def getInputWord(self):
+        return self.wordInput.text.strip().lower()
+
+    def backToMenu(self, instance):
+        self.manager.current = 'menu'
+
+
+class DoodleWordApp(App):
+    FONT_SCALE = 0.05
+
+    settings = {}
+
+    theme = DictProperty({})
+    fontSize = NumericProperty(0)
+
+    editions = {
+        'fourLetter': {
+            'length': 4,
+            'words': fourLetterWords
+        },
+        'fiveLetter': {
+            'length': 5,
+            'words': fiveLetterWords
+        },
+        'sixLetter': {
+            'length': 6,
+            'words': sixLetterWords
+        },
+        'sevenLetter': {
+            'length': 7,
+            'words': sevenLetterWords
+        }
+    }
+
+    defaultAttempts = 6
+    attempts = NumericProperty(defaultAttempts)
+    dynamicPadding = NumericProperty(0)
+
+    attemptsNames = [
+        [1, '1 спроба'],
+        [2, '2 спроби'],
+        [3, '3 спроби'],
+        [4, '4 спроби'],
+        [5, '5 спроб'],
+        [6, '6 спроб'],
+        [7, '7 спроб'],
+        [8, '8 спроб']
+    ]
+
+    defaultEdition = 'fiveLetter'
+    edition = editions[defaultEdition]
+
+    editionsNames = [
+        ['fourLetter','4 букви'],
+        ['fiveLetter','5 букв'], 
+        ['sixLetter','6 букв'], 
+        ['sevenLetter','7 букв']
+    ]
+
+    userWord = ''
+    userWordSetted = BooleanProperty(False)
+
+    def setEdition(self, mode):
+        self.edition = self.editions[mode]
+
+    def setTheme(self, themeName):
+        if (themeName == 'light'):
+            self.theme = ThemeManager.light_theme
+        elif (themeName == 'dark'):
+            self.theme = ThemeManager.dark_theme
+
+    def setUserWord(self, word):
+        self.userWord = word
+        self.userWordSetted = True
+
+    def clearUserWord(self):
+        self.userWord = ''
+        self.userWordSetted = False
+
+    def readSettings(self):
+        config = configparser.ConfigParser()
+        thisFileDir = os.path.dirname(os.path.abspath(__file__))
+        configPath = os.path.join(thisFileDir, 'config.ini')
+        config.read(configPath)
+
+        themeName = config.get("Settings", "theme", fallback="light")
+        self.setTheme(themeName)
+
+    def getRandomWord(self):
+        if (self.userWord != ''):
+            userWord = self.userWord
+            self.clearUserWord()
+            return userWord
+        return random.choice(self.edition['words'])
+
+    def onWindowResize(self, window, size):
+        self.fontSize = size[0] * self.FONT_SCALE
+
+    def updatePadding(self, *args):
+        self.dynamicPadding = max(0, 90 - self.attempts*15)
+
+    def build(self):
+        Builder.load_string(KV)
+        Window.softinput_mode = 'below_target'
+
+        self.readSettings()
+
+        sm = ScreenManager(transition=SwapTransition())
+        sm.add_widget(DoodleWordMenu(name='menu'))
+        sm.add_widget(DoodleWordSettings(name='settings'))
+        sm.add_widget(DoodleWordGame(name='game'))
+
+        screen_width = Window.size[0]
+        self.fontSize = screen_width * self.FONT_SCALE
+        Window.bind(size=self.onWindowResize)
+        self.bind(attempts=self.updatePadding)
+
+        return sm
+
+if __name__ == '__main__':
+    DoodleWordApp().run()
