@@ -318,49 +318,58 @@ KV = '''
 '''
 
 
+# Віджет для відображення зображень, закодованих у форматі Base64
 class Base64Image(Image):
+    # Ім'я зображення для пошуку у словнику IMAGE_DICT
     image_name = StringProperty('')
 
+    # Викликається після прив'язки KV-розмітки до віджета
     def on_kv_post(self, base_widget):
         self.update_texture(IMAGE_DICT[self.image_name])
 
+    # Викликається, коли змінюється властивість image_name
     def on_image_name(self, instance, value):
         if value in IMAGE_DICT:
             self.update_texture(IMAGE_DICT[value])
         else:
             print(f"Зображення '{value}' не знайдено!")
 
+    # Декодуємо Base64-стрічку в зображення і встановлюємо текстуру
     def update_texture(self, encoded_image):
         decoded = base64.b64decode(encoded_image)
         buffer = BytesIO(decoded)
         self.texture = CoreImage(buffer, ext="png").texture
 
 
+# Клас-помічник для перетворення кольорів із hex у формат RGBA
 class ColorConverter:
     @staticmethod
     def hex_to_rgba(hex_color, alpha=1):
+        # Перетворює hex-код кольору у список RGBA зі значеннями від 0 до 1
         hex_color = hex_color.lstrip("#")
         r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
         return [round(r / 255.0, 4), round(g / 255.0, 4), round(b / 255.0, 4), alpha]
 
 
+# Клас для зберігання світлої і темної тем оформлення додатку
 class ThemeManager:
     light_theme = {
-        'bg_color': ColorConverter.hex_to_rgba('#FCFCFC'),
-        'text_color': ColorConverter.hex_to_rgba('#1E1E1E'),
-        'button_bg': ColorConverter.hex_to_rgba('#EC9D75'),
-        'input_bg': ColorConverter.hex_to_rgba('#FCFCFC'),
-        'stroke_color': ColorConverter.hex_to_rgba('#1E1E1E'),
-        'logo_image': 'logo_light',
-        'correct_color': ColorConverter.hex_to_rgba('#00C300'),
-        'partly_correct_color': ColorConverter.hex_to_rgba('#D4EF07'),
-        'incorrect_color': ColorConverter.hex_to_rgba('#B1B1B1'),
-        'victory_color': ColorConverter.hex_to_rgba('#00C300'),
-        'defeat_color': ColorConverter.hex_to_rgba('#FF0000'),
-        'left_arrow_image': 'left_arrow_light',
-        'right_arrow_image': 'right_arrow_light',
-        'changed_color': ColorConverter.hex_to_rgba('#C16565')
+        'bg_color': ColorConverter.hex_to_rgba('#FCFCFC'),  # Колір фону
+        'text_color': ColorConverter.hex_to_rgba('#1E1E1E'),  # Колір тексту
+        'button_bg': ColorConverter.hex_to_rgba('#EC9D75'),  # Колір кнопок
+        'input_bg': ColorConverter.hex_to_rgba('#FCFCFC'),  # Колір полів вводу
+        'stroke_color': ColorConverter.hex_to_rgba('#1E1E1E'),  # Колір обводки
+        'logo_image': 'logo_light',  # Ім'я лого для світлої теми
+        'correct_color': ColorConverter.hex_to_rgba('#00C300'),  # Колір правильної відповіді
+        'partly_correct_color': ColorConverter.hex_to_rgba('#D4EF07'),  # Колір частково правильної відповіді
+        'incorrect_color': ColorConverter.hex_to_rgba('#B1B1B1'),  # Колір неправильної відповіді
+        'victory_color': ColorConverter.hex_to_rgba('#00C300'),  # Колір перемоги
+        'defeat_color': ColorConverter.hex_to_rgba('#FF0000'),  # Колір поразки
+        'left_arrow_image': 'left_arrow_light',  # Ліва стрілка
+        'right_arrow_image': 'right_arrow_light',  # Права стрілка
+        'changed_color': ColorConverter.hex_to_rgba('#C16565')  # Колір для змінених елементів
     }
+    
     dark_theme = {
         'bg_color': ColorConverter.hex_to_rgba('#1E1E1E'),
         'text_color': ColorConverter.hex_to_rgba('#FCFCFC'),
@@ -379,25 +388,31 @@ class ThemeManager:
     }
 
 
+# Мітка, яка автоматично підлаштовується під тему оформлення
 class ThemedLabel(Label):
-    bg_color = ListProperty([1, 1, 1, 1])
+    bg_color = ListProperty([1, 1, 1, 1])  # Колір фону тексту
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.app = App.get_running_app()
-        self.bg_color = self.app.theme['button_bg']
-        self.app.bind(theme=self.update_theme)
+        self.bg_color = self.app.theme['button_bg']  # Встановлюємо початковий колір
+        self.app.bind(theme=self.update_theme)  # Підписуємось на зміни теми
 
     def update_theme(self, instance, value):
+        # Оновлюємо колір фону, якщо змінюється тема
         self.bg_color = value['button_bg']
 
 
+# Головне меню додатку
 class DoodleWordMenu(Screen):
+    # Отримуємо екземпляр запущеного додатку
     def on_kv_post(self, base_widget):
         self.app = App.get_running_app()
 
+    # Перехід на екран налаштувань
     def go_to_settings(self):
         self.manager.current = 'settings'
+
 
 # Віджет для вибору режиму гри (довжини слова)
 class WordLengthSpinBox(BoxLayout):
@@ -455,6 +470,7 @@ class AttemptsSpinBox(BoxLayout):
         self.index -= 1
         self.app.attempts = self.items[self.index][0]
         self.app.root.get_screen('settings').changed_session_settings = True
+
 
 # Модальне вікно для введення слова користувачем
 class UserWordModal(ModalView):
