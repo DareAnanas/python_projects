@@ -182,94 +182,97 @@
             on_press: root.back_to_menu()
 
 
+# Модальне вікно завершення гри
 <GameEndModal>:
-    size_hint: 0.5, 0.5
-    auto_dismiss: False
-    background: ''
-    background_color: app.theme['bg_color']
+    size_hint: 0.5, 0.5  # Розмір модального вікна 50% ширини і висоти
+    auto_dismiss: False  # Вікно не закривається при натисканні поза межами
+    background: ''  # Прибираємо стандартне зображення фону
+    background_color: app.theme['bg_color']  # Власний колір фону
     restart_button: restart_button
     BoxLayout:
-        orientation: 'vertical'
-        padding: [20, 10]
-        spacing: 5
+        orientation: 'vertical'  # Вертикальне розташування елементів
+        padding: [20, 10]  # Відступи всередині вікна
+        spacing: 5  # Відстань між елементами
         Label:
-            text: root.title
+            text: root.title  # Заголовок вікна (виграв/програв)
             font_size: app.font_size
-            color: root.color
+            color: root.color  # Колір залежить від результату
         Label:
-            text: 'Правильне слово: ' + app.root.get_screen('game').random_word
+            text: 'Правильне слово: ' + app.root.get_screen('game').random_word  
+            # Відображення правильного слова після закінчення гри
             color: app.theme['text_color']
             font_size: app.font_size / 2
         ThemedButton:
             id: restart_button
-            text: 'Грати знову'
+            text: 'Грати знову'  # Кнопка для початку нової гри
             font_size: app.font_size / 2
 
+# Основний екран гри
 <DoodleWordGame>:
-    word_grid: word_grid
-    word_input: word_input
-    confirm_word_button: confirm_word_button
-    back_to_menu_button: back_to_menu_button
-    hint_label: hint_label
+    word_grid: word_grid  # ID для сітки слів
+    word_input: word_input  # ID поля вводу слова
+    confirm_word_button: confirm_word_button  # ID кнопки підтвердження
+    back_to_menu_button: back_to_menu_button  # ID кнопки повернення до меню
+    hint_label: hint_label  # ID для тексту підказки
     BoxLayout:
-        orientation: 'vertical'
+        orientation: 'vertical'  #Вертикальне розміщення
         padding: [200, 50]
         spacing: 20
         canvas.before:
             Color:
-                rgba: app.theme['bg_color']
+                rgba: app.theme['bg_color']  # Фон екрану гри
             Rectangle:
                 pos: self.pos
                 size: self.size
         BoxLayout:
             orientation: 'vertical'
-            size_hint_y: 0.7
+            size_hint_y: 0.7  # Сітка гри займає 70% починаючи зверху
             GridLayout:
                 id: word_grid
-                cols: app.edition['length']
-                rows: 6
+                cols: app.edition['length']  # Кількість стовпців залежить від довжини слова
+                rows: 6  # Шість рядків за замовчуванням (кількість спроб)
                 spacing: 5
-                padding: [0, app.dynamic_padding]
+                padding: [0, app.dynamic_padding]  # Динамічні відступи згори
         TextInput:
             id: word_input
             font_size: app.font_size / 2
-            size_hint_y: 0.1
+            size_hint_y: 0.1  # Поле вводу займає 10% висоти
             background_color: app.theme['input_bg']
             foreground_color: app.theme['text_color']
             cursor_color: app.theme['text_color']
             background_normal: ''
-            multiline: False
+            multiline: False  # Заборонено багато рядків
             canvas.before:
                 Color:
-                    rgba: app.theme['stroke_color']
+                    rgba: app.theme['stroke_color']  # Рамка навколо поля вводу
                 Line:
                     width: 2
                     rectangle: self.x, self.y, self.width, self.height
         ThemedButton:
             id: confirm_word_button
-            text: 'Вгадати слово'
+            text: 'Вгадати слово'  # Кнопка для підтвердження введеного слова
             size_hint_y: 0.1
             font_size: app.font_size / 2
         ThemedButton:
             id: back_to_menu_button
-            text: 'Повернутися в меню'
+            text: 'Повернутися в меню'  # Кнопка повернення у головне меню
             size_hint_y: 0.1
             font_size: app.font_size / 2
     FloatLayout:
         Label:
             id: hint_label
-            x: (root.width - self.width) / 2
-            y: (root.height - self.height) / 2
+            x: (root.width - self.width) / 2  # Центрування підказки по горизонталі
+            y: (root.height - self.height) / 2  # Центрування підказки по вертикалі
             size_hint: (None, None)
             font_size: app.font_size / 2
-            size: self.texture_size
+            size: self.texture_size  # Розмір залежить від тексту
             padding: 10
-            color: (1,1,1,1)
-            text: ''
-            opacity: 0
+            color: (1,1,1,1)  # Білий текст
+            text: ''  # Початково текст пустий
+            opacity: 0  # Початково невидимий
             canvas.before:
                 Color:
-                    rgba: (0,0,0,1)
+                    rgba: (0,0,0,1)  # Чорний фон для підказки
                 Rectangle:
                     pos: self.pos
                     size: self.size
