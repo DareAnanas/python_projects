@@ -737,11 +737,15 @@ class DoodleWordGame(Screen):
 
 
 class DoodleWordApp(App):
+    # Загальні налаштування (буде заповнено у майбутньому)
     settings = {}
 
+    # Активна тема (світла/темна)
     theme = DictProperty({})
+    # Базовий розмір шрифту (адаптується до ширини вікна)
     font_size = NumericProperty(0)
 
+    # Набори слів для різної довжини
     editions = {
         'fourLetter': {
             'length': 4,
@@ -761,9 +765,12 @@ class DoodleWordApp(App):
         }
     }
 
+    # Кількість спроб за замовчуванням
     attempts = NumericProperty(DEFAULT_ATTEMPTS)
+    # Динамічний відступ для адаптивного інтерфейсу
     dynamic_padding = NumericProperty(0)
 
+    # Список назв кількості спроб
     attempts_names = [
         [1, '1 спроба'],
         [2, '2 спроби'],
@@ -775,44 +782,55 @@ class DoodleWordApp(App):
         [8, '8 спроб']
     ]
 
+    # Режим гри за замовчуванням (4/5/6/7 літер)
     edition = editions[DEFAULT_EDITION]
 
+    # Список назв режимів гри
     editions_names = [
-        ['fourLetter','4 букви'],
-        ['fiveLetter','5 букв'], 
-        ['sixLetter','6 букв'], 
-        ['sevenLetter','7 букв']
+        ['fourLetter', '4 букви'],
+        ['fiveLetter', '5 букв'],
+        ['sixLetter', '6 букв'],
+        ['sevenLetter', '7 букв']
     ]
 
+    # Введене користувачем слово (якщо є)
     user_word = ''
+    # Чи задано слово користувачем
     user_word_setted = BooleanProperty(False)
 
+    # Метод для зміни поточного режиму гри
     def set_edition(self, mode):
         self.edition = self.editions[mode]
 
+    # Метод для встановлення теми інтерфейсу
     def set_theme(self, theme_name):
         if theme_name == 'light':
             self.theme = ThemeManager.light_theme
         elif theme_name == 'dark':
             self.theme = ThemeManager.dark_theme
 
+    # Метод для встановлення власного слова
     def set_user_word(self, word):
         self.user_word = word
         self.user_word_setted = True
 
+    # Метод для очищення власного слова
     def clear_user_word(self):
         self.user_word = ''
         self.user_word_setted = False
 
+    # Зчитування налаштувань із файлу config.ini
     def read_settings(self):
         config = configparser.ConfigParser()
         this_file_dir = os.path.dirname(os.path.abspath(__file__))
         config_path = os.path.join(this_file_dir, 'config.ini')
         config.read(config_path)
 
+        # Встановити тему з файлу або залишити світлу за замовчуванням
         theme_name = config.get("Settings", "theme", fallback="light")
         self.set_theme(theme_name)
 
+    # Отримати випадкове слово або слово користувача
     def get_random_word(self):
         if self.user_word != '':
             user_word = self.user_word
@@ -820,25 +838,34 @@ class DoodleWordApp(App):
             return user_word
         return random.choice(self.edition['words'])
 
+    # Оновити розмір шрифту при зміні розміру вікна
     def on_window_resize(self, window, size):
         self.font_size = size[0] * self.FONT_SCALE
 
+    # Оновити відступи залежно від кількості спроб
     def update_padding(self, *args):
-        self.dynamic_padding = max(0, 90 - self.attempts*15)
+        self.dynamic_padding = max(0, 90 - self.attempts * 15)
 
+    # Побудувати і запустити інтерфейс
     def build(self):
-        Builder.load_string(KV)
-        Window.softinput_mode = 'below_target'
+        Builder.load_string(KV)  # Завантаження розмітки
 
-        self.read_settings()
+        # Налаштування появи клавіатури на Android
+        Window.softinput_mode = 'below_target'  
 
+        self.read_settings()  # Зчитування налаштувань
+
+        # Створення ScreenManager для перемикання між екранами
         sm = ScreenManager(transition=SwapTransition())
         sm.add_widget(DoodleWordMenu(name='menu'))
         sm.add_widget(DoodleWordSettings(name='settings'))
         sm.add_widget(DoodleWordGame(name='game'))
 
+        # Ініціалізація розміру шрифту
         screen_width = Window.size[0]
         self.font_size = screen_width * FONT_SCALE
+
+        # Прив'язка подій зміни розміру вікна та зміни кількості спроб
         Window.bind(size=self.on_window_resize)
         self.bind(attempts=self.update_padding)
 
