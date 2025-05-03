@@ -88,67 +88,67 @@
                 font_size: app.font_size / 2
                 on_press: root.write_user_word()  # При натисканні викликаємо метод запису слова
 
-
+# Розмітка екрану налаштувань гри
 <DoodleWordSettings>:
     BoxLayout:
-        orientation: 'vertical'
-        padding: [200, 50]
-        spacing: 30
-        canvas.before:
+        orientation: 'vertical'  # Розташування елементів вертикально
+        padding: [200, 50]  # Відступи від країв контейнера
+        spacing: 30  # Відстань між елементами
+        canvas.before:  # Промальовка фону перед усіма елементами
             Color:
-                rgba: app.theme['bg_color']
+                rgba: app.theme['bg_color']  # Колір фону з теми
             Rectangle:
                 pos: self.pos
                 size: self.size
         ThemedButton:
-            text: 'Перезапустити гру'
-            on_press: root.restart_game_button_action()
+            text: 'Перезапустити гру'  # Кнопка для перезапуску гри
+            on_press: root.restart_game_button_action()  # Виклик методу перезапуску
         FloatLayout:
             ThemedButton:
-                pos: self.parent.pos
-                text: 'Загадати слово'
+                pos: self.parent.pos  # Позиція кнопки - як у батьківського контейнера
+                text: 'Загадати слово'  # Кнопка для відкриття модального вікна введення слова
                 on_press: root.open_user_word_modal()
             Label:
-                right: self.parent.right
-                top: self.parent.top
-                size_hint: [None, None]
+                right: self.parent.right  # Вирівнювання мітки праворуч
+                top: self.parent.top  # Вирівнювання мітки догори
+                size_hint: [None, None]  # Розмір мітки фіксований
                 size: [20, 20]
                 canvas.before:
                     Color:
-                        rgba: app.theme['changed_color'] if app.user_word_setted else [0,0,0,0]
+                        # Якщо користувач задав слово, мітка підсвічується кольором
+                        rgba: app.theme['changed_color'] if app.user_word_setted else [0,0,0,0]  
                     Ellipse:
                         pos: self.pos
-                        size: self.size
-                
+                        size: self.size  # Малюється кружечок у кутку
         WordLengthSpinBox:
-            id: word_length_spin_box
+            id: word_length_spin_box  # Спінбокс для вибору довжини слова
             Button:
-                size_hint_x: 0.2
+                size_hint_x: 0.2  # Кнопка займає 20% ширини
                 background_color: app.theme['button_bg']
                 background_normal: ''
-                on_press: self.parent.prev_element()
+                on_press: self.parent.prev_element()  # Перехід до попереднього варіанту
                 Base64Image:
-                    image_name: app.theme['left_arrow_image']
+                    image_name: app.theme['left_arrow_image']  # Іконка стрілки вліво
                     size: 25, 25
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y
             Label:
-                size_hint_x: 0.6
+                size_hint_x: 0.6  # Мітка займає 60% ширини
                 font_size: app.font_size
                 color: app.theme['text_color']
-                text: self.parent.items[self.parent.index][1]
+                text: self.parent.items[self.parent.index][1]  # Відображення обраного елемента
             Button:
-                size_hint_x: 0.2
+                size_hint_x: 0.2  # Кнопка займає 20% ширини
                 background_color: app.theme['button_bg']
                 background_normal: ''
-                on_press: self.parent.next_element()
+                on_press: self.parent.next_element()  # Перехід до наступного варіанту
                 Base64Image:
-                    image_name: app.theme['right_arrow_image']
+                    image_name: app.theme['right_arrow_image']  # Іконка стрілки вправо
                     size: 25, 25
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y      
         AttemptsSpinBox:
-            id: attempts_spin_box
+            id: attempts_spin_box  # Спінбокс для вибору кількості спроб
             Button:
                 size_hint_x: 0.2
                 background_color: app.theme['button_bg']
@@ -175,11 +175,12 @@
                     center_x: self.parent.center_x
                     center_y: self.parent.center_y
         ThemedButton:
-            text: 'Змінити тему'
+            text: 'Змінити тему'  # Кнопка для перемикання теми (світла/темна)
             on_press: root.switch_theme()
         ThemedButton:
-            text: 'Назад'
+            text: 'Назад'  # Кнопка повернення в головне меню
             on_press: root.back_to_menu()
+
 
 <GameEndModal>:
     size_hint: 0.5, 0.5
