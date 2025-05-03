@@ -46,47 +46,48 @@
             on_press: app.stop()
 
 
+# Модальне вікно для введення слова користувачем
 <UserWordModal>:
-    size_hint: 0.5, 0.5
-    auto_dismiss: False
-    background: ''
-    background_color: app.theme['bg_color']
-    wordInput: wordInput
-    infoLabel: infoLabel
+    size_hint: 0.5, 0.5  # Вікно займатиме 50% ширини та висоти екрану
+    auto_dismiss: False  # Модальне вікно не закривається при кліку поза межами
+    background: ''  # Власний фон без стандартної текстури
+    background_color: app.theme['bg_color']  # Колір фону модального вікна з теми
+    wordInput: wordInput  # Прив'язка об'єкта TextInput до властивості класу
+    infoLabel: infoLabel  # Прив'язка об'єкта Label до властивості класу
     BoxLayout:
-        orientation: 'vertical'
-        padding: [20, 10]
-        spacing: 20
+        orientation: 'vertical'  # Розташування елементів вертикально
+        padding: [20, 10]  # Відступи всередині модального вікна
+        spacing: 20  # Проміжок між елементами
         Label:
-            id: infoLabel
-            text: root.title
-            font_size: app.fontSize / 2
-            color: app.theme['text_color']
+            id: infoLabel  # Мітка, що показує повідомлення
+            text: root.title  # Текст береться з властивості title у класі
+            font_size: app.fontSize / 2  # Зменшений шрифт для тексту
+            color: app.theme['text_color']  # Колір тексту за темою
         TextInput:
-            id: wordInput
-            font_size: app.fontSize / 2
-            background_color: app.theme['input_bg']
-            foreground_color: app.theme['text_color']
-            cursor_color: app.theme['text_color']
-            background_normal: ''
-            multiline: False
-            canvas.before:
+            id: wordInput  # Поле введення для слова
+            font_size: app.fontSize / 2  # Зменшений розмір шрифту
+            background_color: app.theme['input_bg']  # Колір фону поля введення
+            foreground_color: app.theme['text_color']  # Колір тексту у полі
+            cursor_color: app.theme['text_color']  # Колір курсора
+            background_normal: ''  # Відключення стандартного фону
+            multiline: False  # Дозволяємо тільки однорядковий ввід
+            canvas.before:  # Малюємо рамку навколо поля
                 Color:
-                    rgba: app.theme['stroke_color']
+                    rgba: app.theme['stroke_color']  # Колір рамки
                 Line:
                     width: 2
                     rectangle: self.x, self.y, self.width, self.height
         BoxLayout:
-            orientation: 'horizontal'
-            spacing: 5
+            orientation: 'horizontal'  # Кнопки розташовуються горизонтально
+            spacing: 5  # Проміжок між кнопками
             ThemedButton:
-                text: 'Скасувати'
+                text: 'Скасувати'  # Кнопка для закриття модального вікна
                 font_size: app.fontSize / 2
-                on_press: root.dismiss()
+                on_press: root.dismiss()  # При натисканні закриваємо модальне вікно
             ThemedButton:
-                text: 'Загадати'
+                text: 'Загадати'  # Кнопка для підтвердження введення
                 font_size: app.fontSize / 2
-                on_press: root.writeUserWord()
+                on_press: root.writeUserWord()  # При натисканні викликаємо метод запису слова
 
 <DoodleWordSettings>:
     BoxLayout:
@@ -110,7 +111,6 @@
             Label:
                 right: self.parent.right
                 top: self.parent.top
-                # pos: [self.parent.right - 20, self.parent.top - 20]
                 size_hint: [None, None]
                 size: [20, 20]
                 canvas.before:
