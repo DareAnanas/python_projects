@@ -9,9 +9,6 @@ from kivy.uix.behaviors import ToggleButtonBehavior
 import configparser
 import os
 
-from kivy.uix.togglebutton import ToggleButton
-from kivy.uix.filechooser import FileChooserListView
-
 class ViewTextFileModal(ModalView):
     textInput = ObjectProperty(None)
     
@@ -57,6 +54,9 @@ class NameModal(ModalView):
         if (action == 'createDir'):
             self.actionButton.bind(on_release=self.createDir)
             self.actionButton.text = 'Create'
+        if (action == 'search'):
+            self.actionButton.bind(on_release=self.searchFile)
+            self.actionButton.text = 'Search'
 
     def renameFile(self, *args):
         fileDir = os.path.dirname(self.filepath)
@@ -90,6 +90,28 @@ class NameModal(ModalView):
         self.fileView._trigger_update()
         self.dismiss()
 
+    def createFilter(self, name):
+        if (name == '' or name == '*' or name == '*.*'):
+            return '*'
+
+        if (name.startswith('*.')):
+            return name
+
+        def filter(folder, filename):
+            filename = os.path.basename(filename)
+            if name.endswith('.*'):
+                namePart = name[:-2]
+                return filename.startswith(namePart + '.')
+            else:
+                return filename == name
+        
+        return filter
+
+    def searchFile(self, *args):
+        userText = self.nameInput.text.strip()
+        self.fileView.filters = [self.createFilter(userText)]
+        self.dismiss()
+
 class DeleteFileModal(ModalView):
     
     def __init__(self, fileView, **kwargs):
@@ -101,9 +123,6 @@ class DeleteFileModal(ModalView):
         os.remove(self.filepath)
         self.fileView._trigger_update()
         self.dismiss()
-
-
-
 
 class FileManager(RelativeLayout):
     fileView = ObjectProperty(None)
@@ -234,6 +253,10 @@ class FileManager(RelativeLayout):
     def createDir(self):
         createDirModal = NameModal('createDir', self.fileView)
         createDirModal.open()
+
+    def searchFile(self):
+        searchFileModal = NameModal('search', self.fileView)
+        searchFileModal.open()
 
 class FileManagerApp(App):
     settings = {}

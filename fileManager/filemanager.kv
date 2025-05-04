@@ -84,6 +84,12 @@
                     ContextMenuTextItem:
                         text: "Create new folder"
                         on_release: root.closeHandler('app', root.createDir)
+            AppMenuTextItem:
+                text: "Search"
+                ContextMenu:
+                    ContextMenuTextItem:
+                        text: "Search file"
+                        on_release: root.closeHandler('app', root.searchFile)
         ContextMenu:
             id: contextMenu
             visible: False
@@ -155,6 +161,12 @@
                         on_release: root.closeHandler('context', root.goToHomeDir)
                     ContextMenuTextItem:
                         text: "Create new folder"
+            ContextMenuTextItem:
+                text: "Search"
+                ContextMenu:
+                    ContextMenuTextItem:
+                        text: 'Search file'
+                        on_release: root.closeHandler('context', root.searchFile)
 
 <ViewTextFileModal>:
     size_hint: (0.9, 0.9)
