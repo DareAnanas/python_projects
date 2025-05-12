@@ -1,0 +1,26 @@
+<DragLabel>:
+    size: (app.gridSpacing, app.gridSpacing)
+    drag_rectangle: self.x, self.y, self.width, self.height
+    drag_timeout: 10000000
+    drag_distance: 0
+    canvas.before:
+        # Color:
+        #     rgba: (0.5,0.5,0.5,1)
+        # Rectangle:
+        #     pos: (self.x, self.y)
+        #     size: (self.width, self.height)
+        Color:
+            rgba: (1,1,1,1)
+        Rectangle:
+            pos: (self.x + 5, self.y + 5)
+            size: (self.width - 10, self.height - 10)
+
+<GridMove>:
+    MouseCoordLabel:
+        pos: (0, root.height - app.gridSpacing)
+        size: (160, app.gridSpacing)
+    Grid:
+        pos: (0, 0)
+        size: (root.width, root.height - app.gridSpacing)
+        DragLabel:
+            size_hint: (None, None)
