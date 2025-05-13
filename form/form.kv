@@ -1,0 +1,73 @@
+<Search>:
+    orientation: 'vertical'
+    padding: (10, 0)
+    spacing: 5
+    canvas.before:
+        Color:
+            rgba: (0.5, 0.5, 0.5, 1)
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+    Label:
+        text: root.fieldName
+    TextInput:
+        multiline: False
+    ListBox:
+        size_hint: (1, None)
+        height: 200
+
+<SpinBox>:
+    Button:
+        size_hint_x: 0.2
+        on_press: self.parent.prevElement()
+        Image:
+            source: 'left_arrow.png'
+            size: 25, 25
+            center_x: self.parent.center_x
+            center_y: self.parent.center_y
+    Label:
+        size_hint_x: 0.6
+        text: str(self.parent.index)
+    Button:
+        size_hint_x: 0.2
+        on_press: self.parent.nextElement()
+        Image:
+            source: 'right_arrow.png'
+            size: 25, 25
+            center_x: self.parent.center_x
+            center_y: self.parent.center_y
+
+<Form>:
+    BoxLayout:
+        id: mainLayout
+        orientation: 'vertical'
+        padding: (30, 20)
+        spacing: 20
+        BoxLayout:
+            id: searchLayout
+            size_hint_y: 0.6
+            orientation: 'horizontal'
+            spacing: 10
+            Search:
+                fieldName: 'Kurwa'
+            Search:
+                fieldName: 'Kurwa'
+            
+        Label:
+            text: 'Number of passagers'
+            size_hint_y: 0.1
+        SpinBox:
+            id: spinBox
+            # padding: (200, 0)
+            size_hint_y: 0.1
+            size_hint_x: 0.5
+            pos_hint: {"center_x": 0.5}
+        Button:
+            text: 'Send Form'
+            size_hint_y: 0.1
+            size_hint_x: 0.5
+            pos_hint: {"center_x": 0.5}
+        Label:
+            text: 'Status Label'
+            size_hint_y: 0.1
+            
