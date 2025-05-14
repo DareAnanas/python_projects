@@ -908,7 +908,7 @@ class DoodleWordApp(App):
 
     # Оновити розмір шрифту при зміні розміру вікна
     def on_window_resize(self, window, size):
-        self.font_size = size[0] * self.FONT_SCALE
+        self.font_size = size[0] * FONT_SCALE
 
     # Оновити відступи залежно від кількості спроб
     def update_padding(self, *args):
